@@ -1,14 +1,15 @@
 import {
-    Text,
-    StyleSheet,
     FlatList,
-    View,
     Pressable,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
 import PaddedSafeAreaView from "@/components/PaddedSafeAreaView";
 import ProgressBar from "@/components/ProgressBar";
 import { Ionicons } from "@expo/vector-icons";
+import { Link } from "expo-router";
 
 export default function HomeView() {
     return (
@@ -39,7 +40,9 @@ export default function HomeView() {
                 </View>
             </View>
             <Pressable style={styles.startButton} onPress={() => alert("click")}>
-                <Text style={styles.buttonText}>Start Shooting</Text>
+                <Link href="/tracker" style={{ flex: 1 }}>
+                    <Text style={styles.buttonText}>Start Shooting</Text>
+                </Link>
             </Pressable>
         </PaddedSafeAreaView>
     );
