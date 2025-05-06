@@ -5,12 +5,13 @@ import {
   View,
   Platform,
   Dimensions,
+  Animated,
 } from "react-native";
 import { Image } from "expo-image";
 
 import PaddedSafeAreaView from "@/components/PaddedSafeAreaView";
 import { useRouter } from "expo-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 
 interface Shot {
@@ -28,6 +29,21 @@ export default function ShotTrackerView() {
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get("window"),
   });
+
+  const madeShots = shots.filter((shot) => shot.made).length;
+  const attemptedShots = shots.length; // this includes both made and missed shots
+  const shootingPercentage =
+    attemptedShots === 0 ? 0 : Math.round((madeShots / attemptedShots) * 100);
+
+  const fadeAnim = useRef(new Animated.Value(1)).current; // starts fully visible
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: currentShot ? 0.4 : 1, // dim when popup is shown
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [currentShot, fadeAnim]);
 
   // Update dimensions on window resize (for web)
   useEffect(() => {
@@ -59,6 +75,7 @@ export default function ShotTrackerView() {
   };
 
   const handleCourtPress = (event: any) => {
+    if (currentShot) return; // we already have a shot in progress
     let locationX = 0;
     let locationY = 0;
 
@@ -86,10 +103,6 @@ export default function ShotTrackerView() {
   const undoShot = () => {
     setShots(shots.slice(0, -1));
   };
-
-  const madeShots = 12;
-  const attemptedShots = 22;
-  const shootingPercentage = Math.round((madeShots / attemptedShots) * 100);
 
   return (
     <PaddedSafeAreaView style={styles.screen}>
@@ -144,11 +157,18 @@ export default function ShotTrackerView() {
               : styles.mobileCourtContainer,
           ]}
         >
-          <Image
-            source={require("@/assets/images/court.jpg")}
-            style={styles.courtImage}
-            contentFit="cover"
-          />
+          <Animated.View
+            style={{
+              opacity: fadeAnim,
+              ...StyleSheet.flatten(styles.courtImage),
+            }}
+          >
+            <Image
+              source={require("@/assets/images/court.jpg")}
+              style={StyleSheet.absoluteFill} // fill the Animated.View container
+              contentFit="cover"
+            />
+          </Animated.View>
           <Pressable
             style={StyleSheet.absoluteFill}
             onPress={handleCourtPress}
