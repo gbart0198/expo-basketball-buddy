@@ -1,17 +1,12 @@
-import {
-    FlatList,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
 import PaddedSafeAreaView from "@/components/PaddedSafeAreaView";
 import ProgressBar from "@/components/ProgressBar";
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 
 export default function HomeView() {
+    const router = useRouter();
     return (
         <PaddedSafeAreaView>
             <Text style={styles.title}>Welcome</Text>
@@ -23,12 +18,20 @@ export default function HomeView() {
                     <View style={styles.listItem}>
                         <Text style={styles.listItemDate}>{item.date}</Text>
                         <View style={styles.listItemContent}>
-                            <Text style={styles.listItemShots}>{item.makes} / {item.shots}</Text>
-                            <Text style={styles.listItemPercentage}>{Math.round((item.makes / item.shots) * 100)}%</Text>
+                            <Text style={styles.listItemShots}>
+                                {item.makes} / {item.shots}
+                            </Text>
+                            <Text style={styles.listItemPercentage}>
+                                {Math.round((item.makes / item.shots) * 100)}%
+                            </Text>
                         </View>
                     </View>
                 )}
-                ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: "#ccc", marginHorizontal: 16 }} />}
+                ItemSeparatorComponent={() => (
+                    <View
+                        style={{ height: 1, backgroundColor: "#ccc", marginHorizontal: 16 }}
+                    />
+                )}
             />
             <Text style={styles.heading}>My Goal</Text>
             <View style={styles.goalContainer}>
@@ -39,10 +42,11 @@ export default function HomeView() {
                     <Text style={styles.progressText}>50/200</Text>
                 </View>
             </View>
-            <Pressable style={styles.startButton} onPress={() => alert("click")}>
-                <Link href="/tracker" style={{ flex: 1 }}>
-                    <Text style={styles.buttonText}>Start Shooting</Text>
-                </Link>
+            <Pressable
+                style={styles.startButton}
+                onPress={() => router.push("/(tracker)/tracker")}
+            >
+                <Text style={styles.buttonText}>Start Shooting</Text>
             </Pressable>
         </PaddedSafeAreaView>
     );
@@ -51,9 +55,8 @@ export default function HomeView() {
 const data = [
     { shots: 75, makes: 56, date: "Today" },
     { shots: 50, makes: 40, date: "Apr 23" },
-    { shots: 100, makes: 80, date: "Apr 22" }
-]
-
+    { shots: 100, makes: 80, date: "Apr 22" },
+];
 
 const styles = StyleSheet.create({
     title: {
@@ -72,7 +75,7 @@ const styles = StyleSheet.create({
         padding: 8,
         margin: 4,
         color: "black",
-        flexDirection: "row"
+        flexDirection: "row",
     },
     listItemShots: {
         fontSize: 24,
@@ -112,7 +115,7 @@ const styles = StyleSheet.create({
     goalContent: {
         flex: 1,
         flexDirection: "column",
-        marginLeft: 5
+        marginLeft: 5,
     },
     startButton: {
         backgroundColor: "#fcba03",
