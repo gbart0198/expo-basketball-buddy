@@ -5,18 +5,23 @@ interface SessionProps {
   madeShots: number;
   attemptedShots: number;
   shootingPercentage: number;
+  loadSessionCallback: any;
 }
 
-const ShootingSession = ({
+const SessionHeader = ({
   madeShots,
   attemptedShots,
   shootingPercentage,
+  loadSessionCallback,
 }: SessionProps) => {
   const router = useRouter();
   return (
     <View style={styles.sessionContainer}>
       <View style={styles.sessionHeaderContent}>
         <Text style={styles.sessionHeading}>SESSION STATS</Text>
+        <Pressable style={styles.sessionImport} onPress={loadSessionCallback}>
+          <Text style={{ color: "white" }}>Import</Text>
+        </Pressable>
         <Pressable style={styles.sessionClose} onPress={() => router.back()}>
           <Text style={{ color: "white" }}>Cancel Session</Text>
         </Pressable>
@@ -90,6 +95,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
   },
+  sessionImport: {
+    backgroundColor: "green",
+    padding: 8,
+    borderRadius: 5,
+    alignItems: "center",
+  },
 });
 
-export default ShootingSession;
+export default SessionHeader;

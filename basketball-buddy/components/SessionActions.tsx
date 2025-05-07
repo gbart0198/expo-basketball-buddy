@@ -1,11 +1,11 @@
 import { useRouter } from "expo-router";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 
-const SessionActions = () => {
+const SessionActions = ({ onSave }: { onSave: any }) => {
   const router = useRouter();
   return (
     <View style={styles.buttonsContainer}>
-      <Pressable style={styles.saveButton}>
+      <Pressable style={styles.saveButton} onPress={onSave}>
         <Text style={styles.buttonText}>Save</Text>
       </Pressable>
       <Pressable style={styles.endButton} onPress={() => router.back()}>
