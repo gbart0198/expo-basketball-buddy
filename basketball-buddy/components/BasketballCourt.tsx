@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { View, Animated, Pressable, Platform, StyleSheet, Dimensions, ActivityIndicator } from "react-native";
 import { Image } from "expo-image";
 import Shot from "@/models/Shot";

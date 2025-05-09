@@ -1,0 +1,123 @@
+import { Text, View, Pressable, StyleSheet, Switch, TextInput, Modal } from "react-native";
+import { COLORS } from "@/theme";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+
+const CreateSessionModal = ({ visible, onClose }: { visible: boolean, onClose: any }) => {
+    const [useTimer, setUseTimer] = useState(false);
+    const [sessionName, setSessionName] = useState('');
+    const [timerDuration, setTimerDuration] = useState('');
+
+    return (
+        <Modal
+            visible={visible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={onClose}
+        >
+            <Pressable style={styles.overlay} onPress={onClose}>
+                <View style={styles.centeredView}>
+                    <Pressable onPress={(e) => e.stopPropagation()}>
+                        <View style={styles.modalContent}>
+                            <View style={styles.header}>
+                                <Text style={styles.headerText}>Create a New Session</Text>
+                                <Pressable style={styles.closeButton} onPress={onClose}>
+                                    <Ionicons name="close" size={24} color={COLORS.borderColor} />
+                                </Pressable>
+                            </View>
+                            <View style={styles.form}>
+                                <View style={styles.inputGroup}>
+                                    <Text style={styles.label}>Session Name</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter session name"
+                                        value={sessionName}
+                                        onChangeText={setSessionName}
+                                    />
+                                </View>
+                                <View style={styles.inputGroup}>
+                                    <Text style={styles.label}>Use Timer</Text>
+                                    <Switch
+                                        value={useTimer}
+                                        onValueChange={setUseTimer}
+                                        trackColor={{ false: COLORS.borderColor, true: COLORS.primaryAccent }}
+                                        thumbColor={useTimer ? "white" : COLORS.borderColor}
+                                    />
+                                </View>
+                                {useTimer && <View style={styles.inputGroup}>
+                                    <Text style={styles.label}>Timer Duration</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter duration in minutes"
+                                        keyboardType="numeric"
+                                        value={timerDuration}
+                                        onChangeText={setTimerDuration}
+                                    />
+                                </View>}
+                            </View>
+                        </View>
+                    </Pressable>
+                </View>
+            </Pressable>
+        </Modal>
+    )
+}
+
+const styles = StyleSheet.create({
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    centeredView: {
+        width: '80%',
+        maxWidth: 400,
+    },
+    modalContent: {
+        backgroundColor: COLORS.background,
+        padding: 16,
+        borderRadius: 8,
+        shadowColor: COLORS.borderColor,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    header: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+    headerText: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: COLORS.primaryAccent,
+    },
+    form: {
+
+    },
+    closeButton: {
+        padding: 8,
+    },
+    inputGroup: {
+        marginBottom: 16,
+    },
+    label: {
+        fontSize: 14,
+        color: COLORS.textSecondary,
+        marginBottom: 4,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: COLORS.borderColor,
+        color: "red",
+        borderRadius: 4,
+        paddingHorizontal: 8,
+        paddingVertical: 8,
+        fontSize: 16,
+    },
+})
+
+export default CreateSessionModal;
