@@ -1,34 +1,13 @@
-// app/tracker/_layout.tsx
+// app/_layout.tsx
 import { Slot } from "expo-router";
-import CustomHeader from "@/components/StackHeader";
-import { Header } from "@react-navigation/elements";
+import { COLORS } from "@/theme";
+import { StatusBar } from "expo-status-bar";
 
 export default function TrackerLayout() {
-    return (
-        <Slot />
-    )
+  return (
+    <>
+      <StatusBar style="light" backgroundColor={COLORS.background} />
+      <Slot />
+    </>
+  );
 }
-
-/*
-export default function TrackerLayout() {
-    return (
-        <Stack screenOptions={{
-            header: (props) => (
-                <CustomHeader
-                    title={props.route.name}
-                    showBackButton={props.back !== undefined}
-                />
-            ),
-        }}>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen
-                name="(tracker)/tracker"
-                options={{
-                    headerShown: true,
-                    title: "Start Shooting!",
-                }}
-            />
-        </Stack>
-    );
-}
-*/

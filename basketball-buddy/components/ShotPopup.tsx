@@ -1,6 +1,7 @@
 import { View, Pressable, StyleSheet } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import Shot from "@/models/Shot"
+import { COLORS, BORDER_RADIUS, SPACING, createShadow } from "@/theme"
 
 const ShotPopup = ({ shot, handleShotMake, handleShotMiss }: { shot: Shot, handleShotMake: any, handleShotMiss: any }) => {
     return (<View
@@ -12,11 +13,17 @@ const ShotPopup = ({ shot, handleShotMake, handleShotMiss }: { shot: Shot, handl
             },
         ]}
     >
-        <Pressable onPress={handleShotMake}>
-            <Ionicons name="checkmark-circle" size={24} color="green" />
+        <Pressable 
+            style={styles.button} 
+            onPress={handleShotMake}
+        >
+            <Ionicons name="checkmark-circle" size={32} color={COLORS.success} />
         </Pressable>
-        <Pressable onPress={handleShotMiss}>
-            <Ionicons name="close-circle" size={24} color="red" />
+        <Pressable 
+            style={styles.button} 
+            onPress={handleShotMiss}
+        >
+            <Ionicons name="close-circle" size={32} color={COLORS.error} />
         </Pressable>
     </View>)
 }
@@ -24,12 +31,21 @@ const ShotPopup = ({ shot, handleShotMake, handleShotMiss }: { shot: Shot, handl
 const styles = StyleSheet.create({
     popup: {
         flexDirection: "row",
-        justifyContent: "space-between",
+        justifyContent: "space-around",
         position: "absolute",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        padding: 8,
-        borderRadius: 5,
-        zIndex: 1,
+        backgroundColor: COLORS.cardBackground,
+        padding: SPACING.md,
+        borderRadius: BORDER_RADIUS.lg,
+        zIndex: 10,
+        width: 120,
+        marginLeft: -60,
+        marginTop: 10,
+        ...createShadow(5),
+    },
+    button: {
+        padding: SPACING.xs,
+        borderRadius: BORDER_RADIUS.round,
+        margin: SPACING.xs,
     },
 })
 

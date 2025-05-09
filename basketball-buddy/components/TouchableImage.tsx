@@ -1,12 +1,13 @@
 import { Image } from "expo-image";
-import { TouchableOpacity } from "react-native"
+import { TouchableOpacity } from "react-native";
+import { createShadow } from "@/theme";
 
 const TouchableImage = ({
     source,
     style,
     containerStyle,
     onPress,
-    activeOpacity = 0.7,
+    activeOpacity = 0.8,
     ...imageProps
 }: {
     source: any;
@@ -18,7 +19,7 @@ const TouchableImage = ({
 }) => {
     return (
         <TouchableOpacity
-            style={containerStyle}
+            style={[{ ...createShadow(2) }, containerStyle]}
             onPress={onPress}
             activeOpacity={activeOpacity}
         >
