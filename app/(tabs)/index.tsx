@@ -14,7 +14,6 @@ import {
 import { useState } from "react";
 import CreateSessionModal from "@/components/CreateSessionModal";
 import { useSessionStore } from "@/hooks/useSessionStore";
-import { Session } from "@/models/Session";
 
 export default function HomeView() {
     const router = useRouter();

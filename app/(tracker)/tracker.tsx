@@ -13,7 +13,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import BasketballCourt from "@/components/BasketballCourt";
-import { useShotTracker } from "@/hooks/useShotTracker";
 import {
     COLORS,
     SPACING,
@@ -27,31 +26,27 @@ export default function ShotTrackerView() {
     const router = useRouter();
     const params = useLocalSearchParams();
     const { timerValue } = params;
-    const currentSession = useSessionStore((state) => state.currentSession);
     const insets = useSafeAreaInsets();
     const [isDesktop, setIsDesktop] = useState(false);
     const [dimensions, setDimensions] = useState({
         window: Dimensions.get("window"),
     });
+    const {
+        currentSession,
+        addShot,
+        undoLastShot,
+        saveSession,
+    } = useSessionStore();
 
     if (!currentSession) {
         alert("error: No session found");
         router.back();
         return null;
-    } else {
-        alert(`Session: ${currentSession.name} loaded.`);
     }
-
-    const shots = currentSession.shots;
-
-    const {
-        addShot,
-        saveSession,
-        undoLastShot,
-        madeShots,
-        attemptedShots,
-        shootingPercentage,
-    } = useShotTracker();
+    const madeShots = currentSession.shots.filter((s) => s.made).length;
+    const attemptedShots = currentSession.shots.length;
+    const shootingPercentage =
+        attemptedShots === 0 ? 0 : Math.round((madeShots / attemptedShots) * 100);
 
     useEffect(() => {
         setIsDesktop(Platform.OS === "web" && dimensions.window.width > 768);
@@ -116,7 +111,7 @@ export default function ShotTrackerView() {
                 <View style={styles.courtContainer}>
                     <BasketballCourt
                         isDesktop={isDesktop}
-                        shots={shots}
+                        shots={currentSession.shots}
                         onShotConfirmed={addShot}
                     />
                 </View>
