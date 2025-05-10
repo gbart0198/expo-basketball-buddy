@@ -19,6 +19,7 @@ export default function HomeView() {
     const [renderSessionPopup, setRenderSessionPopup] = useState(false);
     const onSessionCreate = (sessionName: string, useTimer: boolean, timerValue?: number) => {
         alert(`creation of session ${sessionName} with timer ${useTimer} and value ${timerValue}`);
+        console.log('test');
     }
 
     return (
