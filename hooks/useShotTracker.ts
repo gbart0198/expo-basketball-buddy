@@ -19,7 +19,6 @@ export function useShotTracker() {
       const fileUri = FileSystem.documentDirectory + "session.json";
       const jsonString = await FileSystem.readAsStringAsync(fileUri);
       const json = JSON.parse(jsonString);
-      console.log(json);
       setShots(json);
     } catch (error) {
       console.error("Error loading shots:", error);
