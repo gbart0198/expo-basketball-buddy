@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import Shot from "@/models/Shot";
 import ShotPopup from "./ShotPopup";
 import { COLORS, BORDER_RADIUS, SPACING, createShadow } from "@/theme";
+import ShotMarker from "./ShotMarker";
 
 const BasketballCourt = ({
     isDesktop,
@@ -117,17 +118,7 @@ const BasketballCourt = ({
             )}
 
             {shots.map((shot, index) => (
-                <View
-                    key={index}
-                    style={[
-                        styles.shotMarker,
-                        {
-                            left: shot.x,
-                            top: shot.y,
-                            backgroundColor: shot.made ? COLORS.success : COLORS.error,
-                        },
-                    ]}
-                />
+                <ShotMarker key={index} shot={shot} />
             ))}
         </View>
     );
@@ -158,15 +149,6 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "100%",
         borderRadius: BORDER_RADIUS.lg,
-    },
-    shotMarker: {
-        position: "absolute",
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        borderWidth: 2,
-        borderColor: COLORS.textPrimary,
-        ...createShadow(2),
     },
     loadingContainer: {
         ...StyleSheet.absoluteFillObject,
