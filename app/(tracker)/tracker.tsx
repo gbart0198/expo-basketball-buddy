@@ -9,7 +9,7 @@ import {
     StatusBar,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import BasketballCourt from "@/components/BasketballCourt";
@@ -24,6 +24,8 @@ import {
 
 export default function ShotTrackerView() {
     const router = useRouter();
+    const params = useLocalSearchParams();
+    const { sessionName, timerValue } = params;
     const insets = useSafeAreaInsets();
     const [isDesktop, setIsDesktop] = useState(false);
     const [dimensions, setDimensions] = useState({

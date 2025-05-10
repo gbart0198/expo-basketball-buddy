@@ -3,7 +3,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import PaddedSafeAreaView from "@/components/PaddedSafeAreaView";
 import ProgressBar from "@/components/ProgressBar";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
     COLORS,
     SPACING,
@@ -18,8 +18,14 @@ export default function HomeView() {
     const router = useRouter();
     const [renderSessionPopup, setRenderSessionPopup] = useState(false);
     const onSessionCreate = (sessionName: string, useTimer: boolean, timerValue?: number) => {
-        alert(`creation of session ${sessionName} with timer ${useTimer} and value ${timerValue}`);
-        console.log('test');
+        const params = {
+            sessionName: sessionName,
+            timerValue: useTimer ? timerValue : undefined,
+        }
+        router.push({
+            pathname: "/(tracker)/tracker",
+            params: params
+        })
     }
 
     return (
