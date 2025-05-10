@@ -3,7 +3,8 @@ import { COLORS } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 
-const CreateSessionModal = ({ visible, onClose }: { visible: boolean, onClose: any }) => {
+const CreateSessionModal = ({ visible, setModalRender, onCloseCallback }:
+    { visible: boolean, setModalRender: any, onCloseCallback: any }) => {
     const [useTimer, setUseTimer] = useState(false);
     const [sessionName, setSessionName] = useState('');
     const [timerDuration, setTimerDuration] = useState('');
@@ -17,6 +18,20 @@ const CreateSessionModal = ({ visible, onClose }: { visible: boolean, onClose: a
         return true;
     }
 
+    const onModalClose = () => {
+        setModalRender(false);
+    }
+
+    const onModalConfirm = () => {
+        if (isNameValid && isTimerValid()) {
+            const timerValue = useTimer ? Number(timerDuration) : undefined;
+            onCloseCallback(sessionName, useTimer, timerValue);
+        } else {
+            alert('Please enter a valid session name and timer duration (if using a timer).');
+        }
+        setModalRender(false);
+    }
+
     const isSessionValid = isNameValid && isTimerValid();
 
     return (
@@ -24,15 +39,15 @@ const CreateSessionModal = ({ visible, onClose }: { visible: boolean, onClose: a
             visible={visible}
             animationType="slide"
             transparent={true}
-            onRequestClose={onClose}
+            onRequestClose={onModalClose}
         >
-            <Pressable style={styles.overlay} onPress={onClose}>
+            <Pressable style={styles.overlay} onPress={onModalClose}>
                 <View style={styles.centeredView}>
                     <Pressable onPress={(e) => e.stopPropagation()}>
                         <View style={styles.modalContent}>
                             <View style={styles.header}>
                                 <Text style={styles.headerText}>Create a New Session</Text>
-                                <Pressable style={styles.closeButton} onPress={onClose}>
+                                <Pressable style={styles.closeButton} onPress={onModalClose}>
                                     <Ionicons name="close" size={24} color={COLORS.borderColor} />
                                 </Pressable>
                             </View>
@@ -72,7 +87,7 @@ const CreateSessionModal = ({ visible, onClose }: { visible: boolean, onClose: a
                                         style={[styles.input, styles.startButton, { backgroundColor: isSessionValid ? COLORS.primaryAccent : COLORS.borderColor }]}
                                         disabled={!isSessionValid}
                                         onPress={() => {
-                                            onClose();
+                                            onModalConfirm();
                                         }}
                                     >
                                         <Text style={{ color: 'white', fontSize: 16 }}>Create Session</Text>

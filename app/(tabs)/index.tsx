@@ -17,11 +17,16 @@ import CreateSessionModal from "@/components/CreateSessionModal";
 export default function HomeView() {
     const router = useRouter();
     const [renderSessionPopup, setRenderSessionPopup] = useState(false);
+    const onSessionCreate = (sessionName: string, useTimer: boolean, timerValue?: number) => {
+        alert(`creation of session ${sessionName} with timer ${useTimer} and value ${timerValue}`);
+    }
+
     return (
         <PaddedSafeAreaView>
             {renderSessionPopup && <CreateSessionModal
                 visible={renderSessionPopup}
-                onClose={() => setRenderSessionPopup(!renderSessionPopup)}
+                setModalRender={setRenderSessionPopup}
+                onCloseCallback={onSessionCreate}
             />}
             <Text style={styles.title}>Welcome</Text>
             <Text style={styles.heading}>Recent Sessions</Text>
