@@ -43,8 +43,12 @@ export default function ShotTrackerView() {
         router.back();
         return null;
     }
-    const madeShots = currentSession.shots.filter((s) => s.made).length;
-    const attemptedShots = currentSession.shots.length;
+    let madeShots = 0;
+    let attemptedShots = 0;
+    currentSession.shots.map((shot) => {
+        madeShots += shot.makes;
+        attemptedShots += shot.attempts;
+    });
     const shootingPercentage =
         attemptedShots === 0 ? 0 : Math.round((madeShots / attemptedShots) * 100);
 

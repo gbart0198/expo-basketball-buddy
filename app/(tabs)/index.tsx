@@ -14,6 +14,7 @@ import {
 import { useState } from "react";
 import CreateSessionModal from "@/components/CreateSessionModal";
 import { useSessionStore } from "@/hooks/useSessionStore";
+import uuid from 'react-native-uuid';
 
 export default function HomeView() {
     const router = useRouter();
@@ -28,6 +29,7 @@ export default function HomeView() {
             timerValue: useTimer ? timerValue : undefined,
         };
         setSession({
+            id: uuid.v4().toString(),
             name: sessionName,
             date: new Date().toISOString(),
             shots: [],

@@ -1,31 +1,69 @@
-import { View, Pressable, StyleSheet } from "react-native"
+import { View, Pressable, StyleSheet, TextInput, Text } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import Shot from "@/models/Shot"
+import Shot from "@/models/ShotSummary"
 import { COLORS, BORDER_RADIUS, SPACING, createShadow } from "@/theme"
+import { useState } from "react"
 
-const ShotPopup = ({ shot, handleShot }: { shot: Shot, handleShot: any }) => {
-    return (<View
-        style={[
-            styles.popup,
-            {
-                left: shot.x,
-                top: shot.y,
-            },
-        ]}
-    >
-        <Pressable
-            style={styles.button}
-            onPress={() => handleShot(true)}
-        >
-            <Ionicons name="checkmark-circle" size={32} color={COLORS.success} />
-        </Pressable>
-        <Pressable
-            style={styles.button}
-            onPress={() => handleShot(false)}
-        >
-            <Ionicons name="close-circle" size={32} color={COLORS.error} />
-        </Pressable>
-    </View>)
+const ShotPopup = ({ shot, handleShots, isMultiple }: { shot: Shot, handleShots: any, isMultiple: boolean }) => {
+    const [shotAttempts, setShotAttempts] = useState('');
+    const [shotMakes, setShotMakes] = useState('');
+    const handleSingleShot = (isMake: boolean) => {
+        handleShots(1, isMake ? 1 : 0);
+    }
+    const handleMultipleShots = () => {
+        const attemptsNum = parseInt(shotAttempts);
+        const makesNum = parseInt(shotMakes);
+        handleShots(attemptsNum, makesNum);
+    }
+    return (
+        <>
+            {isMultiple && (
+                <View
+                    style={{
+                        position: "absolute",
+                        top: shot.y - 30,
+                        left: shot.x - 60,
+                        backgroundColor: COLORS.cardBackground,
+                        padding: SPACING.sm,
+                        borderRadius: BORDER_RADIUS.lg,
+                        zIndex: 10,
+                        ...createShadow(5),
+                    }}
+                >
+                    <View style={styles.multipleShotContainer}>
+                        <TextInput style={styles.input} value={shotAttempts} onChangeText={setShotAttempts} placeholder="Attempts" keyboardType="numeric" placeholderTextColor={COLORS.textSecondary} />
+                        <TextInput style={styles.input} value={shotMakes} onChangeText={setShotMakes} placeholder="Makes" keyboardType="numeric" placeholderTextColor={COLORS.textSecondary} />
+                        <Pressable style={styles.button} onPress={() => handleMultipleShots()}>
+                            <Text style={{ color: COLORS.success }}>Submit</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            )}
+            {!isMultiple && (
+                <View
+                    style={[
+                        styles.popup,
+                        {
+                            left: shot.x,
+                            top: shot.y,
+                        },
+                    ]}
+                >
+                    <Pressable
+                        style={styles.button}
+                        onPress={() => handleSingleShot(true)}
+                    >
+                        <Ionicons name="checkmark-circle" size={32} color={COLORS.success} />
+                    </Pressable>
+                    <Pressable
+                        style={styles.button}
+                        onPress={() => handleSingleShot(false)}
+                    >
+                        <Ionicons name="close-circle" size={32} color={COLORS.error} />
+                    </Pressable>
+                </View>
+            )}
+        </>)
 }
 
 const styles = StyleSheet.create({
@@ -37,7 +75,7 @@ const styles = StyleSheet.create({
         padding: SPACING.sm,
         borderRadius: BORDER_RADIUS.lg,
         zIndex: 10,
-        width: 120,
+        width: "auto",
         marginLeft: -60,
         marginTop: 5,
         ...createShadow(5),
@@ -47,6 +85,20 @@ const styles = StyleSheet.create({
         borderRadius: BORDER_RADIUS.round,
         margin: SPACING.xs,
     },
+    multipleShotContainer: {
+        alignItems: "center",
+    },
+    input: {
+        width: 100,
+        height: 40,
+        borderWidth: 1,
+        borderColor: COLORS.borderColor,
+        borderRadius: BORDER_RADIUS.sm,
+        paddingHorizontal: SPACING.xs,
+        margin: SPACING.xs,
+        backgroundColor: COLORS.cardBackground,
+        color: "white",
+    }
 })
 
 export default ShotPopup;

@@ -2,7 +2,7 @@ import { Session } from '@/models/Session';
 import { Platform } from 'react-native';
 import { create } from 'zustand';
 import * as FileSystem from 'expo-file-system';
-import Shot from '@/models/Shot';
+import Shot from '@/models/ShotSummary';
 
 type SessionState = {
     currentSession: Session | null;
@@ -39,9 +39,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             ...session,
             shots: session.shots.filter((s) => {
                 return (
-                    s.x !== shot.x ||
-                    s.y !== shot.y ||
-                    s.made !== shot.made
+                    s.id !== shot.id
                 );
             }),
         };
@@ -53,8 +51,8 @@ export const useSessionStore = create<SessionState>((set, get) => ({
         const updatedSession = {
             ...session,
             shots: session.shots.map((s) => {
-                if (s.x === shot.x && s.y === shot.y) {
-                    return { ...s, made: shot.made };
+                if (s.id === shot.id) {
+                    return shot;
                 }
                 return s;
             }),

@@ -14,7 +14,7 @@ import {
     createShadow,
 } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
-import Shot from "@/models/Shot";
+import Shot from "@/models/ShotSummary";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useSessionService } from "@/hooks/useSessionService";
 import { useEffect } from "react";
@@ -44,16 +44,29 @@ export default function SessionView() {
 
     const getMakes = (shots: Shot[]) => {
         if (!shots.length) return 0;
-        return shots.filter((shot) => shot.made).length;
+        let madeShots = 0;
+        shots.map((shot) => {
+            madeShots += shot.makes;
+        });
+        return madeShots;
     };
-    const getMisses = (shots: Shot[]) => {
+    const getAttempts = (shots: Shot[]) => {
         if (!shots.length) return 0;
-        return shots.filter((shot) => !shot.made).length;
+        let attemptedShots = 0;
+        shots.map((shot) => {
+            attemptedShots += shot.attempts;
+        });
+        return attemptedShots;
     };
     const getPercentage = (shots: Shot[]) => {
         if (!shots.length) return 0;
-        const madeShots = shots.filter((shot) => shot.made).length;
-        return Math.round((madeShots / shots.length) * 100);
+        let attemptedShots = 0;
+        let madeShots = 0;
+        shots.map((shot) => {
+            madeShots += shot.makes;
+            attemptedShots += shot.attempts;
+        });
+        return Math.round((madeShots / attemptedShots) * 100);
     };
 
     return (
@@ -87,7 +100,7 @@ export default function SessionView() {
 
                             <View style={styles.statsContainer}>
                                 <View style={styles.statItem}>
-                                    <Text style={styles.statValue}>{item.shots.length}</Text>
+                                    <Text style={styles.statValue}>{getAttempts(item.shots)}</Text>
                                     <Text style={styles.statLabel}>Total Shots</Text>
                                 </View>
                                 <View style={styles.statItem}>
@@ -95,7 +108,7 @@ export default function SessionView() {
                                     <Text style={styles.statLabel}>Made</Text>
                                 </View>
                                 <View style={styles.statItem}>
-                                    <Text style={styles.statValue}>{getMisses(item.shots)}</Text>
+                                    <Text style={styles.statValue}>{getAttempts(item.shots) - getMakes(item.shots)}</Text>
                                     <Text style={styles.statLabel}>Missed</Text>
                                 </View>
                             </View>

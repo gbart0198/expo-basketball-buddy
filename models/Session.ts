@@ -1,7 +1,8 @@
-import Shot from "./Shot";
+import ShotSummary from "./ShotSummary";
 
 export interface Session {
-  name: string;
-  date: string;
-  shots: Shot[];
+    id: string;
+    name: string;
+    date: string;
+    shots: ShotSummary[];
 }

@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { View, Animated, Pressable, Platform, StyleSheet, Dimensions, ActivityIndicator, Text } from "react-native";
+import { View, Animated, Pressable, Platform, StyleSheet, Dimensions, ActivityIndicator, Text, Switch, Easing } from "react-native";
 import { Image } from "expo-image";
-import Shot from "@/models/Shot";
+import Shot from "@/models/ShotSummary";
 import ShotPopup from "./ShotPopup";
 import { COLORS, BORDER_RADIUS, SPACING, createShadow } from "@/theme";
 import ShotMarker from "./ShotMarker";
+import { useSessionStore } from "@/hooks/useSessionStore";
+import uuid from "react-native-uuid";
+import AnimatedSwitch from "./AnimatedSwitch";
 
 const BasketballCourt = ({
     isDesktop,
@@ -15,10 +18,16 @@ const BasketballCourt = ({
     shots: Shot[];
     onShotConfirmed: (shot: Shot) => void;
 }) => {
+    const currentSession = useSessionStore((state) => state.currentSession);
     const [currentShot, setCurrentShot] = useState<Shot | null>(null);
+    const [isMultipleShotMode, setIsMultipleShotMode] = useState(false);
     const fadeAnim = useRef(new Animated.Value(1)).current;
     const [imageLoaded, setImageLoaded] = useState(false);
     const dimensions = Dimensions.get("window");
+
+    if (!currentSession) {
+        return null;
+    }
 
     useEffect(() => {
         Animated.timing(fadeAnim, {
@@ -28,9 +37,10 @@ const BasketballCourt = ({
         }).start();
     }, [currentShot, fadeAnim]);
 
-    const handleShot = (made: boolean) => {
+    const handleShot = (attempts: number, makes: number) => {
         if (!currentShot) return;
-        currentShot.made = made;
+        currentShot.attempts = attempts;
+        currentShot.makes = makes
         onShotConfirmed(currentShot);
         setCurrentShot(null);
     }
@@ -56,14 +66,24 @@ const BasketballCourt = ({
         }
 
         const shot: Shot = {
+            id: uuid.v4().toString(),
+            sessionId: currentSession.id,
             x: locationX,
             y: locationY,
-            made: true,
-            timestamp: new Date().toISOString(),
+            makes: 0,
+            attempts: 1,
+            last_shot_at: new Date().toISOString(),
         };
 
         setCurrentShot(shot);
     };
+
+    const onPressablePress = () => {
+        console.log("Pressable pressed");
+        console.log(`Current state: ${isMultipleShotMode}`);
+        setIsMultipleShotMode((prev) => !prev)
+        console.log(`Current state after change: ${isMultipleShotMode}`);
+    }
 
     const getMobileStyles = () => {
         const isSmallDevice = dimensions.width < 375;
@@ -108,13 +128,20 @@ const BasketballCourt = ({
             {currentShot && (
                 <ShotPopup
                     shot={currentShot}
-                    handleShot={handleShot}
+                    handleShots={handleShot}
+                    isMultiple={isMultipleShotMode}
                 />
             )}
 
             {shots.map((shot, index) => (
                 <ShotMarker key={index} shot={shot} />
             ))}
+            <AnimatedSwitch
+                onText="Single"
+                offText="Multiple"
+                isSwitched={isMultipleShotMode}
+                onPress={() => setIsMultipleShotMode((prev) => !prev)}
+            />
         </View>
     );
 };
@@ -150,6 +177,43 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: COLORS.cardBackground,
+    },
+    toggleContainer: {
+        position: "absolute",
+        bottom: SPACING.md,
+        right: SPACING.md,
+    },
+    toggleBackground: {
+        width: 80, // fixed width
+        height: 28,
+        borderRadius: 14,
+        justifyContent: "center",
+        paddingHorizontal: 2,
+        overflow: "hidden",
+    },
+    toggleCircle: {
+        position: "absolute",
+        width: 36,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: COLORS.cardBackground,
+        borderWidth: 1,
+        borderColor: COLORS.borderColor,
+        top: 2,
+        left: 2,
+    },
+    singleShotText: {
+        color: COLORS.textSecondary
+    },
+    multipleShotText: {
+        color: COLORS.textSecondary,
+    },
+    toggleText: {
+        position: "absolute",
+        fontWeight: "600",
+        fontSize: 12,
+        top: "50%",
+        transform: [{ translateY: -8 }],
     },
 });
 

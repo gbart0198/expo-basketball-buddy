@@ -1,4 +1,4 @@
-import Shot from "@/models/Shot";
+import Shot from "@/models/ShotSummary";
 import { COLORS, createShadow } from "@/theme";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useState } from "react";
@@ -11,6 +11,7 @@ const ShotMarker = ({ shot }: { shot: Shot }) => {
     const handleShotPress = () => {
         setRenderShotPopup(!renderShotPopup);
     };
+    const shotPercentage = Math.round(shot.makes / shot.attempts * 100);
     return (
         <Pressable
             onPress={handleShotPress}
@@ -50,7 +51,7 @@ const ShotMarker = ({ shot }: { shot: Shot }) => {
                 style={[
                     styles.shotMarker,
                     {
-                        backgroundColor: shot.made ? COLORS.success : COLORS.error,
+                        backgroundColor: shotPercentage >= 70 ? COLORS.success : shotPercentage >= 50 ? COLORS.warning : COLORS.error,
                     },
                 ]}
             />
