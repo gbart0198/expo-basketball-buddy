@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { View, Animated, Pressable, Platform, StyleSheet, Dimensions, ActivityIndicator } from "react-native";
+import { View, Animated, Pressable, Platform, StyleSheet, Dimensions, ActivityIndicator, Text } from "react-native";
 import { Image } from "expo-image";
 import Shot from "@/models/Shot";
 import ShotPopup from "./ShotPopup";
@@ -28,22 +28,18 @@ const BasketballCourt = ({
         }).start();
     }, [currentShot, fadeAnim]);
 
-    const handleShotMake = () => {
+    const handleShot = (made: boolean) => {
         if (!currentShot) return;
-        currentShot.made = true;
+        currentShot.made = made;
         onShotConfirmed(currentShot);
         setCurrentShot(null);
-    };
-
-    const handleShotMiss = () => {
-        if (!currentShot) return;
-        currentShot.made = false;
-        onShotConfirmed(currentShot);
-        setCurrentShot(null);
-    };
+    }
 
     const handleCourtPress = (event: any) => {
-        if (currentShot) return;
+        if (currentShot) {
+            setCurrentShot(null);
+            return;
+        }
 
         let locationX = 0;
         let locationY = 0;
@@ -112,8 +108,7 @@ const BasketballCourt = ({
             {currentShot && (
                 <ShotPopup
                     shot={currentShot}
-                    handleShotMake={handleShotMake}
-                    handleShotMiss={handleShotMiss}
+                    handleShot={handleShot}
                 />
             )}
 

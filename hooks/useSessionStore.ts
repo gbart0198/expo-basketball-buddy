@@ -9,6 +9,8 @@ type SessionState = {
     setCurrentSession: (session: Session | null) => void;
     clearSession: () => void;
     addShot: (shot: Shot) => void;
+    removeShot: (shot: Shot) => void;
+    editShot: (shot: Shot) => void;
     undoLastShot: () => void;
     loadSession: (session: Session) => Promise<void>;
     saveSession: () => Promise<void>;
@@ -30,7 +32,35 @@ export const useSessionStore = create<SessionState>((set, get) => ({
         };
         set({ currentSession: updatedSession });
     },
-
+    removeShot: (shot) => {
+        const session = get().currentSession;
+        if (!session) return;
+        const updatedSession = {
+            ...session,
+            shots: session.shots.filter((s) => {
+                return (
+                    s.x !== shot.x ||
+                    s.y !== shot.y ||
+                    s.made !== shot.made
+                );
+            }),
+        };
+        set({ currentSession: updatedSession });
+    },
+    editShot: (shot) => {
+        const session = get().currentSession;
+        if (!session) return;
+        const updatedSession = {
+            ...session,
+            shots: session.shots.map((s) => {
+                if (s.x === shot.x && s.y === shot.y) {
+                    return { ...s, made: shot.made };
+                }
+                return s;
+            }),
+        };
+        set({ currentSession: updatedSession });
+    },
     undoLastShot: () => {
         const session = get().currentSession;
         if (!session) return;
