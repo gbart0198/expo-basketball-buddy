@@ -41,17 +41,9 @@ const CreateSessionModal = ({
     setModalRender(false);
   };
 
-  const addSessionToStore = () => {
-    store?.addRow(SESSION_TABLE, {
-      name: sessionName,
-      date: new Date().toISOString(),
-    });
-  };
-
   const onModalConfirm = () => {
     if (isNameValid && isTimerValid()) {
       const timerValue = useTimer ? Number(timerDuration) : undefined;
-      addSessionToStore();
       onCloseCallback(sessionName, useTimer, timerValue);
     } else {
       alert(

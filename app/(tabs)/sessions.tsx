@@ -21,12 +21,7 @@ import { useEffect } from "react";
 import { useSessionStore } from "@/hooks/useSessionStore";
 import { Session } from "@/models/Session";
 import { useRouter } from "expo-router";
-import {
-  useDelRowCallback,
-  useRow,
-  useSetCellCallback,
-  useSortedRowIds,
-} from "tinybase/ui-react";
+import { useRow, useSortedRowIds } from "tinybase/ui-react";
 
 const SESSION_TABLE = "session";
 const NAME_CELL = "name";
@@ -55,6 +50,7 @@ export default function SessionView() {
   const handleOpenSession = (session: Session) => {
     const params = {
       timerValue: undefined,
+      sessionId: session.id,
     };
     setSession(session);
     router.push({
