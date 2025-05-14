@@ -21,30 +21,30 @@ import { useEffect } from "react";
 import { useSessionStore } from "@/hooks/useSessionStore";
 import { Session } from "@/models/Session";
 import { useRouter } from "expo-router";
-import { useRow, useSortedRowIds } from "tinybase/ui-react";
+import { useSQLiteContext } from "expo-sqlite";
+import * as schema from "@/db/schema";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { sessions } from "@/db/schema";
 
 const SESSION_TABLE = "session";
 const NAME_CELL = "name";
 
-const SessionItem = ({ id }: { id: any }) => {
-  const data = useRow(SESSION_TABLE, id);
-  console.log(data);
-  return (
-    <View>
-      <TouchableOpacity key={id}>
-        <Text style={styles.todoText}>Session Item</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
 export default function SessionView() {
   const router = useRouter();
+  const db = useSQLiteContext();
+  const drizzleDb = drizzle(db, { schema });
+
   const { sessionData, getSessions, isLoading } = useSessionService();
   const setSession = useSessionStore((state) => state.setCurrentSession);
 
+  const loadSessions = async () => {
+    const result = await drizzleDb.select().from(sessions);
+    console.log("Sessions loaded from SQLite:", result);
+  };
+
   useEffect(() => {
     getSessions();
+    loadSessions();
   }, []);
 
   const handleOpenSession = (session: Session) => {
@@ -86,18 +86,9 @@ export default function SessionView() {
     return Math.round((madeShots / attemptedShots) * 100);
   };
 
-  const renderItem = ({ item: id }: { item: any }) => <SessionItem id={id} />;
-
   return (
     <PaddedSafeAreaView>
       <Text style={styles.title}>My Sessions</Text>
-      <View>
-        <Text style={styles.title}>Recent Sessions</Text>
-        <FlatList
-          data={useSortedRowIds(SESSION_TABLE, NAME_CELL)}
-          renderItem={renderItem}
-        />
-      </View>
       {isLoading && <LoadingSpinner />}
       {!isLoading && (
         <FlatList

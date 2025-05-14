@@ -6,42 +6,22 @@ import { createLocalPersister } from "tinybase/persisters/persister-browser";
 import { createExpoSqlitePersister } from "tinybase/persisters/persister-expo-sqlite";
 import { useCreatePersister, useCreateStore } from "tinybase/ui-react";
 import { createContext, useEffect } from "react";
+import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import migrations from "@/drizzle/migrations";
+import { SQLiteProvider } from "expo-sqlite";
 
-const StoreContext = createContext(null);
+export const DB_NAME = "basketball-buddy.db";
 
-const useAndStartPersister = (store: any) =>
-  // Persist store to Expo SQLite or local storage; load once, then auto-save.
-  useCreatePersister(
-    store,
-    (store) =>
-      Platform.OS === "web"
-        ? createLocalPersister(store, "todos")
-        : createExpoSqlitePersister(store, SQLite.openDatabaseSync("todos.db")),
-    [],
-    (persister: any) => persister.load().then(persister.startAutoSave),
-  );
 // The main app.
-const usePersistentStore = () => {
+const useDb = () => {
   // Initialize the (memoized) TinyBase store and persist it.
-  const store = useCreateStore(createStore);
-  useAndStartPersister(store);
+  const expoDb = SQLite.openDatabaseSync(DB_NAME);
+  const db = drizzle(expoDb);
 
-  return store;
+  const { success, error } = useMigrations(db, migrations);
+
+  return db;
 };
 
-export const StoreProvider = ({ children }: { children: any }) => {
-  const store = usePersistentStore();
-
-  useEffect(() => {
-    // Initialize schema if needed
-    // Ensure tables and indexes exist
-    if (!store.hasTable("sessions")) {
-      store.setTable("sessions", {});
-    }
-    if (!store.hasTable("shots")) {
-      store.setTable("shots", {});
-    }
-  });
-};
-
-export default usePersistentStore;
+export default useDb;
