@@ -21,30 +21,30 @@ import { useEffect } from "react";
 import { useSessionStore } from "@/hooks/useSessionStore";
 import { Session } from "@/models/Session";
 import { useRouter } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
-import * as schema from "@/db/schema";
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { sessions } from "@/db/schema";
-
-const SESSION_TABLE = "session";
-const NAME_CELL = "name";
+import { useDatabase } from "@/db/hooks/useDatabase";
+import { sessionService } from "@/db/services/sessionService";
 
 export default function SessionView() {
   const router = useRouter();
-  const db = useSQLiteContext();
-  const drizzleDb = drizzle(db, { schema });
+  const db = useDatabase();
 
   const { sessionData, getSessions, isLoading } = useSessionService();
   const setSession = useSessionStore((state) => state.setCurrentSession);
 
   const loadSessions = async () => {
-    const result = await drizzleDb.select().from(sessions);
-    console.log("Sessions loaded from SQLite:", result);
+    const results = await sessionService(db).getAllSessionsWithShots();
+    results.forEach((session: any) => {
+      console.log(`session ${session.id}`);
+
+      console.log(session.shots);
+    });
   };
 
   useEffect(() => {
     getSessions();
-    loadSessions();
+    if (db) {
+      loadSessions();
+    }
   }, []);
 
   const handleOpenSession = (session: Session) => {

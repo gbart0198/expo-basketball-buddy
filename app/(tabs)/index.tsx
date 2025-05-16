@@ -15,12 +15,19 @@ import { useState } from "react";
 import CreateSessionModal from "@/components/CreateSessionModal";
 import { useSessionStore } from "@/hooks/useSessionStore";
 import uuid from "react-native-uuid";
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { sessions } from "@/db/schema";
+import * as schema from "@/db/schema";
+import { Session } from "@/db/schema";
 
 export default function HomeView() {
   const router = useRouter();
   const setSession = useSessionStore((state) => state.setCurrentSession);
   const [renderSessionPopup, setRenderSessionPopup] = useState(false);
-  const onSessionCreate = (
+  const db = useSQLiteContext();
+  const drizzleDb = drizzle(db, { schema });
+  const onSessionCreate = async (
     sessionName: string,
     useTimer: boolean,
     timerValue?: number,
@@ -33,9 +40,21 @@ export default function HomeView() {
     setSession({
       id: uuid.v4().toString(),
       name: sessionName,
-      date: new Date().toISOString(),
       shots: [],
+      date: new Date().toISOString(),
     });
+    await drizzleDb.insert(sessions).values([
+      {
+        name: sessionName,
+        startTime: new Date().toISOString(),
+        endTime: new Date().toISOString(),
+      },
+      {
+        name: sessionName,
+        startTime: new Date().toISOString(),
+        endTime: new Date().toISOString(),
+      },
+    ]);
     router.push({
       pathname: "/(tracker)/tracker",
       params,

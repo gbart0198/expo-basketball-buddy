@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
 
 export const sessions = sqliteTable("sessions", {
@@ -21,3 +22,5 @@ export const shotSummaries = sqliteTable("shot_summaries", {
 
 export type Session = typeof sessions.$inferSelect;
 export type ShotSummary = typeof shotSummaries.$inferSelect;
+export type NewSession = typeof sessions.$inferInsert;
+export type NewShotSummary = typeof shotSummaries.$inferInsert;
