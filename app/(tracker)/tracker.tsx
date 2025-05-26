@@ -21,8 +21,11 @@ import {
     createShadow,
 } from "@/theme";
 import { useSessionStore } from "@/hooks/useSessionStore";
+import { useDatabase } from "@/context/database-context";
 
 export default function ShotTrackerView() {
+    const { selectedSession, addShotSummary, removeShotSummary } =
+        useDatabase();
     const router = useRouter();
     const params = useLocalSearchParams();
     const { timerValue } = params;
@@ -38,14 +41,15 @@ export default function ShotTrackerView() {
         saveSession,
     } = useSessionStore();
 
-    if (!currentSession) {
+    if (!selectedSession) {
         alert("error: No session found");
         router.back();
         return null;
     }
+
     let madeShots = 0;
     let attemptedShots = 0;
-    currentSession.shots.map((shot) => {
+    selectedSession.shots?.map((shot) => {
         madeShots += shot.makes;
         attemptedShots += shot.attempts;
     });
@@ -115,7 +119,7 @@ export default function ShotTrackerView() {
                 <View style={styles.courtContainer}>
                     <BasketballCourt
                         isDesktop={isDesktop}
-                        shots={currentSession.shots}
+                        shots={selectedSession.shots}
                         onShotConfirmed={addShot}
                     />
                 </View>

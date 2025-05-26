@@ -15,12 +15,14 @@ import { useState } from "react";
 import CreateSessionModal from "@/components/CreateSessionModal";
 import { useSessionStore } from "@/hooks/useSessionStore";
 import uuid from 'react-native-uuid';
+import { useDatabase } from "@/context/database-context";
 
 export default function HomeView() {
     const router = useRouter();
     const setSession = useSessionStore((state) => state.setCurrentSession);
+    const { addSession } = useDatabase();
     const [renderSessionPopup, setRenderSessionPopup] = useState(false);
-    const onSessionCreate = (
+    const onSessionCreate = async (
         sessionName: string,
         useTimer: boolean,
         timerValue?: number,
@@ -28,12 +30,11 @@ export default function HomeView() {
         const params = {
             timerValue: useTimer ? timerValue : undefined,
         };
-        setSession({
-            id: uuid.v4().toString(),
+        await addSession({
             name: sessionName,
-            date: new Date().toISOString(),
-            shots: [],
-        });
+            date: new Date().toLocaleTimeString()
+        })
+
         router.push({
             pathname: "/(tracker)/tracker",
             params,

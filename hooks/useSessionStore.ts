@@ -3,13 +3,14 @@ import { Platform } from 'react-native';
 import { create } from 'zustand';
 import * as FileSystem from 'expo-file-system';
 import Shot from '@/models/ShotSummary';
+import { ShotSummary } from '@/db';
 
 type SessionState = {
     currentSession: Session | null;
     setCurrentSession: (session: Session | null) => void;
     clearSession: () => void;
     addShot: (shot: Shot) => void;
-    removeShot: (shot: Shot) => void;
+    removeShot: (shot: ShotSummary) => void;
     editShot: (shot: Shot) => void;
     undoLastShot: () => void;
     loadSession: (session: Session) => Promise<void>;
