@@ -15,12 +15,8 @@ import {
     createShadow,
 } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
-import Shot from "@/models/ShotSummary";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { useSessionService } from "@/hooks/useSessionService";
 import { useEffect } from "react";
-import { useSessionStore } from "@/hooks/useSessionStore";
-import { Session } from "@/models/Session";
 import { useRouter } from "expo-router";
 import { SessionWithShots, useDatabase } from "@/context/database-context";
 import { ShotSummary } from "@/db";

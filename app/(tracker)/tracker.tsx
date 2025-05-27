@@ -20,7 +20,6 @@ import {
     FONT_SIZE,
     createShadow,
 } from "@/theme";
-import { useSessionStore } from "@/hooks/useSessionStore";
 import { useDatabase } from "@/context/database-context";
 
 export default function ShotTrackerView() {
@@ -34,12 +33,6 @@ export default function ShotTrackerView() {
     const [dimensions, setDimensions] = useState({
         window: Dimensions.get("window"),
     });
-    const {
-        currentSession,
-        addShot,
-        undoLastShot,
-        saveSession,
-    } = useSessionStore();
 
     if (!selectedSession) {
         alert("error: No session found");
@@ -110,7 +103,7 @@ export default function ShotTrackerView() {
                     </View>
                 </View>
 
-                <TouchableOpacity style={styles.iconButton} onPress={undoLastShot}>
+                <TouchableOpacity style={styles.iconButton} onPress={() => console.log("TODO: Undo Last Shot")}>
                     <Ionicons name="arrow-undo" size={24} color={COLORS.textPrimary} />
                 </TouchableOpacity>
             </View>
@@ -128,11 +121,6 @@ export default function ShotTrackerView() {
             <View
                 style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}
             >
-                <TouchableOpacity style={styles.actionButton} onPress={saveSession}>
-                    <Ionicons name="save" size={20} color={COLORS.textPrimary} />
-                    <Text style={styles.actionText}>Save</Text>
-                </TouchableOpacity>
-
                 <TouchableOpacity
                     style={[styles.actionButton, styles.endButton]}
                     onPress={() => router.back()}

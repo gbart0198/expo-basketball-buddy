@@ -2,7 +2,6 @@ import Shot from "@/models/ShotSummary";
 import { COLORS, createShadow } from "@/theme";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useState } from "react";
-import { useSessionStore } from "@/hooks/useSessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import { ShotSummary } from "@/db";
 import { useDatabase } from "@/context/database-context";
@@ -17,7 +16,6 @@ const ShotMarker = ({
     courtHeight: number;
 }) => {
     const [renderShotPopup, setRenderShotPopup] = useState(false);
-    const { removeShot, editShot } = useSessionStore();
     const { removeShotSummary, selectedSession } = useDatabase();
     const handleShotPress = () => {
         setRenderShotPopup(!renderShotPopup);

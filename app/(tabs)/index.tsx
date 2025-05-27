@@ -13,13 +13,10 @@ import {
 } from "@/theme";
 import { useState } from "react";
 import CreateSessionModal from "@/components/CreateSessionModal";
-import { useSessionStore } from "@/hooks/useSessionStore";
-import uuid from 'react-native-uuid';
 import { useDatabase } from "@/context/database-context";
 
 export default function HomeView() {
     const router = useRouter();
-    const setSession = useSessionStore((state) => state.setCurrentSession);
     const { addSession } = useDatabase();
     const [renderSessionPopup, setRenderSessionPopup] = useState(false);
     const onSessionCreate = async (

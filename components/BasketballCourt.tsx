@@ -9,12 +9,9 @@ import {
     ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
-import Shot from "@/models/ShotSummary";
 import ShotPopup from "./ShotPopup";
 import { COLORS, BORDER_RADIUS, SPACING, createShadow } from "@/theme";
 import ShotMarker from "./ShotMarker";
-import { useSessionStore } from "@/hooks/useSessionStore";
-import uuid from "react-native-uuid";
 import AnimatedSwitch from "./AnimatedSwitch";
 import { CreateShotSummary, ShotSummary } from "@/db";
 import { useDatabase } from "@/context/database-context";
@@ -58,7 +55,7 @@ const BasketballCourt = ({
         if (!currentShot) return;
         currentShot.attempts = attempts;
         currentShot.makes = makes;
-        addShotSummary(currentShot);
+        const createdShot = addShotSummary(currentShot);
         setCurrentShot(null);
     };
 

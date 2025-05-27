@@ -20,9 +20,9 @@ interface DatabaseContextType {
     selectedSession: SessionWithShots | null;
     setSelectedSession: (session: SessionWithShots) => void;
     currentSessionShots: ShotSummary[];
-    addSession: (sessionData: CreateSession) => Promise<void>;
+    addSession: (sessionData: CreateSession) => Promise<SessionWithShots | undefined>;
     removeSession: (sessionId: number) => Promise<void>;
-    addShotSummary: (shotSummaryData: CreateShotSummary) => Promise<void>;
+    addShotSummary: (shotSummaryData: CreateShotSummary) => Promise<ShotSummary | undefined>;
     removeShotSummary: (
         shotSummaryId: number
     ) => Promise<void>;
