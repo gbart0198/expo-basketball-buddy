@@ -68,21 +68,14 @@ export default function SessionView() {
             month: "2-digit",
             day: "2-digit",
         };
-        const formattedDate = new Date(date).toLocaleDateString("en-US", options);
-        return formattedDate;
-    }
-
-    const addShotToSession = (session: SessionWithShots) => {
-        if (!session.id) return;
-        setSelectedSession(session);
-        addShotSummary({
-            sessionId: session.id,
-            x: 0.5,
-            y: 0.5,
-            attempts: 10,
-            makes: 5,
-            lastShotAt: new Date().toISOString(),
-        })
+        try {
+            const formattedDate = new Date(date).toLocaleDateString("en-US", options);
+            console.log(`Original date: ${date}, Formatted date: ${formattedDate}`);
+            return formattedDate;
+        } catch (error) {
+            console.error("Error parsing date:", error);
+            return "Invalid Date";
+        }
     }
 
     return (
@@ -91,7 +84,7 @@ export default function SessionView() {
             {isLoading && <LoadingSpinner />}
             {!isLoading && (
                 <FlatList
-                    data={sessionsList}
+                    data={sessionsList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())}
                     renderItem={({ item }) => (
                         <TouchableOpacity style={styles.sessionCard}>
                             <View style={styles.sessionHeader}>
@@ -134,15 +127,6 @@ export default function SessionView() {
                             </View>
 
                             <View style={styles.sessionFooter}>
-                                <TouchableOpacity style={styles.footerButton}
-                                    onPress={() => addShotToSession(item)}>
-                                    <Ionicons
-                                        name="add-outline"
-                                        size={16}
-                                        color={COLORS.textSecondary}
-                                    />
-                                    <Text style={styles.buttonText}>Add</Text>
-                                </TouchableOpacity>
                                 <TouchableOpacity style={styles.footerButton}>
                                     <Ionicons
                                         name="analytics-outline"
@@ -211,7 +195,7 @@ const styles = StyleSheet.create({
         borderBottomColor: COLORS.borderColor,
     },
     sessionDate: {
-        fontSize: FONT_SIZE.lg,
+        fontSize: FONT_SIZE.sm,
         fontWeight: 600,
         color: COLORS.textPrimary,
     },

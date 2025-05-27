@@ -37,6 +37,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
     const currentSessionShots = selectedSession?.shots || [];
     const [isLoading, setIsLoading] = useState(true);
 
+
     const loadSessions = async () => {
         try {
             setIsLoading(true);
@@ -66,6 +67,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         loadSessions();
     }, []);
+
 
     const addSession = async (sessionData: CreateSession): Promise<SessionWithShots | undefined> => {
         try {

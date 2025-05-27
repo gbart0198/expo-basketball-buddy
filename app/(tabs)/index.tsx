@@ -29,7 +29,7 @@ export default function HomeView() {
         };
         await addSession({
             name: sessionName,
-            date: new Date().toLocaleTimeString()
+            date: new Date().toISOString()
         })
 
         router.push({
