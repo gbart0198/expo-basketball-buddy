@@ -27,7 +27,7 @@ export default function ShotTrackerView() {
         useDatabase();
     const router = useRouter();
     const params = useLocalSearchParams();
-    const { timerValue } = params;
+    const { timerValue, edit } = params;
     const insets = useSafeAreaInsets();
     const [isDesktop, setIsDesktop] = useState(false);
     const [dimensions, setDimensions] = useState({
@@ -39,6 +39,8 @@ export default function ShotTrackerView() {
         router.back();
         return null;
     }
+
+    const editMode = edit === "true";
 
     let madeShots = 0;
     let attemptedShots = 0;

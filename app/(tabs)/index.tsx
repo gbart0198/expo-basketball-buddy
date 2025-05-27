@@ -26,6 +26,7 @@ export default function HomeView() {
     ) => {
         const params = {
             timerValue: useTimer ? timerValue : undefined,
+            edit: "true",
         };
         await addSession({
             name: sessionName,

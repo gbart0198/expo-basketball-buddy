@@ -24,16 +24,18 @@ export default function SessionView() {
     const { sessionsList, setSelectedSession, isLoading, addSession, removeSession, addShotSummary } =
         useDatabase();
 
-    const handleOpenSession = (session: SessionWithShots) => {
+    const handleOpenSession = (session: SessionWithShots, isEdit: boolean) => {
         const params = {
             timerValue: undefined,
+            edit: String(isEdit)
         };
         setSelectedSession(session);
         router.push({
             pathname: "/(tracker)/tracker",
             params,
         });
-    };
+    }
+
 
     const getMakes = (shots: ShotSummary[] | undefined) => {
         if (!shots || !shots.length) return 0;
@@ -127,6 +129,16 @@ export default function SessionView() {
                             </View>
 
                             <View style={styles.sessionFooter}>
+                                <TouchableOpacity style={styles.footerButton}
+                                    onPress={() => handleOpenSession(item, false)}
+                                >
+                                    <Ionicons
+                                        name="open-outline"
+                                        size={16}
+                                        color={COLORS.textSecondary}
+                                    />
+                                    <Text style={styles.buttonText}>View</Text>
+                                </TouchableOpacity>
                                 <TouchableOpacity style={styles.footerButton}>
                                     <Ionicons
                                         name="analytics-outline"
@@ -145,14 +157,14 @@ export default function SessionView() {
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     style={styles.footerButton}
-                                    onPress={() => handleOpenSession(item)}
+                                    onPress={() => handleOpenSession(item, true)}
                                 >
                                     <Ionicons
-                                        name="open-outline"
+                                        name="create-outline"
                                         size={16}
                                         color={COLORS.textSecondary}
                                     />
-                                    <Text style={styles.buttonText}>Open</Text>
+                                    <Text style={styles.buttonText}>Edit</Text>
                                 </TouchableOpacity>
                             </View>
                         </TouchableOpacity>
