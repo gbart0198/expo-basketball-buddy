@@ -19,11 +19,9 @@ import { useDatabase } from "@/context/database-context";
 const BasketballCourt = ({
     isDesktop,
     shots,
-    onShotConfirmed,
 }: {
     isDesktop: boolean;
     shots: ShotSummary[];
-    onShotConfirmed: (shot: CreateShotSummary) => void;
 }) => {
     const { selectedSession, addShotSummary } = useDatabase();
     const [currentShot, setCurrentShot] = useState<CreateShotSummary | null>(null);

@@ -1,4 +1,3 @@
-import Shot from "@/models/ShotSummary";
 import { COLORS, createShadow } from "@/theme";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useState } from "react";
@@ -16,7 +15,7 @@ const ShotMarker = ({
     courtHeight: number;
 }) => {
     const [renderShotPopup, setRenderShotPopup] = useState(false);
-    const { removeShotSummary, selectedSession } = useDatabase();
+    const { removeShotSummary } = useDatabase();
     const handleShotPress = () => {
         setRenderShotPopup(!renderShotPopup);
     };

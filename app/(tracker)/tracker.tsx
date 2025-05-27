@@ -23,7 +23,7 @@ import {
 import { useDatabase } from "@/context/database-context";
 
 export default function ShotTrackerView() {
-    const { selectedSession, addShotSummary, removeShotSummary } =
+    const { selectedSession } =
         useDatabase();
     const router = useRouter();
     const params = useLocalSearchParams();
@@ -113,7 +113,6 @@ export default function ShotTrackerView() {
                     <BasketballCourt
                         isDesktop={isDesktop}
                         shots={selectedSession.shots || []}
-                        onShotConfirmed={addShotSummary}
                     />
                 </View>
             </View>
