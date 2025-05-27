@@ -70,8 +70,16 @@ const ShotMarker = ({
                         </Pressable>
 
                     ) : (
-                        <View style={styles.shotMarkerButton}>
-                            <Text>EDIT MODE DISABLED</Text>
+                        <View style={styles.shotMarkerInfo}>
+                            <Text style={{ color: COLORS.textPrimary }}>
+                                {shot.attempts} Attempts
+                            </Text>
+                            <Text style={{ color: COLORS.textPrimary }}>
+                                {shot.makes} Makes
+                            </Text>
+                            <Text style={{ color: COLORS.textPrimary }}>
+                                {shotPercentage}% Success Rate
+                            </Text>
                         </View>
                     )}
                 </View>
@@ -121,6 +129,15 @@ const styles = StyleSheet.create({
     shotMarkerDeleteButton: {
         backgroundColor: COLORS.error,
     },
+    shotMarkerInfo: {
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        backgroundColor: COLORS.textSecondary,
+        borderRadius: 10,
+    }
 });
 
 export default ShotMarker;
