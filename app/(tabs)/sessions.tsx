@@ -5,7 +5,6 @@ import {
     Text,
     View,
     TouchableOpacity,
-    Pressable,
 } from "react-native";
 import {
     COLORS,
@@ -16,7 +15,6 @@ import {
 } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { useEffect } from "react";
 import { useRouter } from "expo-router";
 import { SessionWithShots, useDatabase } from "@/context/database-context";
 import { ShotSummary } from "@/db";
