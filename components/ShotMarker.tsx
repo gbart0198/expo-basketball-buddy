@@ -1,5 +1,5 @@
 import { COLORS, createShadow } from "@/theme";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { ShotSummary } from "@/db";
@@ -30,6 +30,10 @@ const ShotMarker = ({
         top: courtHeight * shot.y,
     };
 
+    const onModalClose = () => {
+        setRenderShotPopup(false);
+    }
+
     const shotScale = shot.attempts > 1 ? 2 : 1;
 
 
@@ -45,49 +49,48 @@ const ShotMarker = ({
             }}
         >
             {renderShotPopup && (
-                <View
-                    style={[
-                        styles.shotMarkerInfoContainer,
-                        {
-                            left: -10,
-                            top: -40,
-                        },
-                    ]}
+                <Modal
+                    visible={renderShotPopup}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={onModalClose}
                 >
-                    {edit ? (
-                        <Pressable
-                            onPress={(e) => {
-                                e.stopPropagation();
-                                removeShotSummary(shot.id);
-                                setRenderShotPopup(false);
-                            }}
-                        >
-                            <Ionicons
-                                name="trash-outline"
-                                size={16}
-                                color={COLORS.textPrimary}
-                                style={{
-                                    backgroundColor: COLORS.error,
-                                    borderRadius: 5000,
-                                    padding: 5,
-                                }}
-                            />
-                        </Pressable>
-
-                    ) : (
-                        <View style={styles.shotMarkerInfo}>
-                            <Text style={{ color: COLORS.textPrimary }}>
-                                {shot.attempts} Attempts
-                            </Text>
-                            <Text style={{ color: COLORS.textPrimary }}>
-                                {shot.makes} Makes
-                            </Text>
-                            <Text style={{ color: COLORS.textPrimary }}>
-                                {shotPercentage}% Success Rate
-                            </Text>
+                    <Pressable style={styles.overlay} onPress={onModalClose}>
+                        <View style={styles.centeredView}>
+                            <Pressable onPress={(e) => e.stopPropagation()}>
+                                <View style={styles.modalContent}>
+                                    <View style={styles.form}>
+                                        <View style={styles.inputGroup}>
+                                            <View style={styles.shotMarkerButton}>
+                                                <Text style={{ color: COLORS.textPrimary }}>
+                                                    {shot.attempts} Attempts
+                                                </Text>
+                                            </View>
+                                            <View style={styles.shotMarkerButton}>
+                                                <Text style={{ color: COLORS.textPrimary }}>
+                                                    {shot.makes} Makes
+                                                </Text>
+                                            </View>
+                                            <View style={styles.shotMarkerButton}>
+                                                <Text style={{ color: COLORS.textPrimary }}>
+                                                    {shotPercentage}% Accuracy
+                                                </Text>
+                                            </View>
+                                        </View>
+                                        <View style={styles.inputGroup}>
+                                            <Pressable style={styles.shotMarkerEditButton} onPress={() => alert("Edit shot feature is not implemented yet.")}>
+                                                <Text style={{ color: COLORS.textPrimary }}>Edit Shot</Text>
+                                            </Pressable>
+                                            <Pressable style={styles.shotMarkerDeleteButton} onPress={() => alert("Delete shot feature is not implemented yet.")}>
+                                                <Text style={{ color: COLORS.textPrimary }}>Delete Shot</Text>
+                                            </Pressable>
+                                        </View>
+                                    </View>
+                                </View>
+                            </Pressable>
                         </View>
-                    )}
-                </View>
+                    </Pressable>
+                </Modal>
             )}
             <View
                 style={[
@@ -120,22 +123,6 @@ const styles = StyleSheet.create({
         borderColor: COLORS.textPrimary,
         ...createShadow(2),
     },
-    multipleShotMarker: { // make it 
-        position: "absolute",
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        borderWidth: 2,
-        borderColor: COLORS.textPrimary,
-        ...createShadow(2),
-    },
-    shotMarkerInfoContainer: {
-        flexDirection: "row",
-        backgroundColor: "none",
-        padding: 10,
-        borderRadius: 10,
-        zIndex: 10,
-    },
     shotMarkerButton: {
         padding: 10,
         borderRadius: 100,
@@ -143,9 +130,15 @@ const styles = StyleSheet.create({
     },
     shotMarkerEditButton: {
         backgroundColor: COLORS.primaryAccent,
+        padding: 10,
+        borderRadius: 100,
+        marginRight: 5,
     },
     shotMarkerDeleteButton: {
         backgroundColor: COLORS.error,
+        padding: 10,
+        borderRadius: 100,
+        marginRight: 5,
     },
     shotMarkerInfo: {
         flexDirection: "column",
@@ -155,6 +148,74 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         backgroundColor: COLORS.textSecondary,
         borderRadius: 10,
+    },
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    centeredView: {
+        width: '80%',
+        maxWidth: 400,
+    },
+    modalContent: {
+        backgroundColor: COLORS.background,
+        padding: 16,
+        borderRadius: 8,
+        shadowColor: COLORS.borderColor,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    header: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+    headerText: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: COLORS.primaryAccent,
+    },
+    form: {
+
+    },
+    closeButton: {
+        padding: 8,
+    },
+    inputGroup: {
+        marginBottom: 16,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    timerGroup: {
+        width: '100%',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexDirection: 'row',
+    },
+    label: {
+        fontSize: 18,
+        color: COLORS.textPrimary,
+        marginBottom: 4,
+    },
+    startButton: {
+        backgroundColor: COLORS.primaryAccent,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    input: {
+        width: '100%',
+        borderWidth: 1,
+        borderColor: COLORS.borderColor,
+        borderRadius: 4,
+        paddingHorizontal: 8,
+        paddingVertical: 8,
+        fontSize: 16,
+        color: COLORS.textPrimary,
     }
 });
 
