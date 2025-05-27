@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useSessionStore } from "@/hooks/useSessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import { ShotSummary } from "@/db";
+import { useDatabase } from "@/context/database-context";
 
 const ShotMarker = ({
     shot,
@@ -17,6 +18,7 @@ const ShotMarker = ({
 }) => {
     const [renderShotPopup, setRenderShotPopup] = useState(false);
     const { removeShot, editShot } = useSessionStore();
+    const { removeShotSummary, selectedSession } = useDatabase();
     const handleShotPress = () => {
         setRenderShotPopup(!renderShotPopup);
     };
@@ -49,7 +51,7 @@ const ShotMarker = ({
                     <Pressable
                         onPress={(e) => {
                             e.stopPropagation();
-                            removeShot(shot);
+                            removeShotSummary(shot.id);
                             setRenderShotPopup(false);
                         }}
                     >

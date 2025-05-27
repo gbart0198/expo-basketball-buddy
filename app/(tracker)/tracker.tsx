@@ -119,8 +119,8 @@ export default function ShotTrackerView() {
                 <View style={styles.courtContainer}>
                     <BasketballCourt
                         isDesktop={isDesktop}
-                        shots={selectedSession.shots}
-                        onShotConfirmed={addShot}
+                        shots={selectedSession.shots || []}
+                        onShotConfirmed={addShotSummary}
                     />
                 </View>
             </View>

@@ -26,10 +26,10 @@ const BasketballCourt = ({
 }: {
     isDesktop: boolean;
     shots: ShotSummary[];
-    onShotConfirmed: (shot: Shot) => void;
+    onShotConfirmed: (shot: CreateShotSummary) => void;
 }) => {
-    const { selectedSession, addShotSummary, removeShotSummary } = useDatabase();
-    const [currentShot, setCurrentShot] = useState<Shot | null>(null);
+    const { selectedSession, addShotSummary } = useDatabase();
+    const [currentShot, setCurrentShot] = useState<CreateShotSummary | null>(null);
     const [isMultipleShotMode, setIsMultipleShotMode] = useState(false);
     const [size, setSize] = useState({ width: 0, height: 0 });
     const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -42,6 +42,7 @@ const BasketballCourt = ({
     };
 
     if (!selectedSession || !selectedSession.id) {
+        console.error("No session selected or session ID is missing.");
         return null;
     }
 
@@ -57,7 +58,7 @@ const BasketballCourt = ({
         if (!currentShot) return;
         currentShot.attempts = attempts;
         currentShot.makes = makes;
-        onShotConfirmed(currentShot);
+        addShotSummary(currentShot);
         setCurrentShot(null);
     };
 

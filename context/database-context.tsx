@@ -24,8 +24,7 @@ interface DatabaseContextType {
     removeSession: (sessionId: number) => Promise<void>;
     addShotSummary: (shotSummaryData: CreateShotSummary) => Promise<void>;
     removeShotSummary: (
-        shotSummaryId: number,
-        sessionId: number,
+        shotSummaryId: number
     ) => Promise<void>;
 }
 
@@ -68,7 +67,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
         loadSessions();
     }, []);
 
-    const addSession = async (sessionData: CreateSession) => {
+    const addSession = async (sessionData: CreateSession): Promise<SessionWithShots | undefined> => {
         try {
             setIsLoading(true);
             let newSession = await db
@@ -82,6 +81,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
             if (newSession.length > 0) {
                 setSessionsList((prev) => [...prev, newSessionWithShots]);
                 setSelectedSession(newSessionWithShots);
+                return newSessionWithShots;
             } else throw new Error("Failed to add session");
         } catch (error) {
             console.error("Error adding session", error);
@@ -104,7 +104,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const addShotSummary = async (shotSummaryData: CreateShotSummary) => {
+    const addShotSummary = async (shotSummaryData: CreateShotSummary): Promise<ShotSummary | undefined> => {
         try {
             setIsLoading(true);
             const newShot = await db
@@ -116,6 +116,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
             if (selectedSession?.id === shotSummaryData.sessionId) {
                 currentSessionShots.push(newShot[0]);
             }
+            return newShot[0];
         } catch (error) {
             console.error("Error inserting shot summary", error);
         } finally {
@@ -125,17 +126,14 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
 
     const removeShotSummary = async (
         shotSummaryId: number,
-        sessionId: number,
     ) => {
         try {
             setIsLoading(true);
             await db.delete(shotSummaries).where(eq(shotSummaries.id, shotSummaryId));
-            if (selectedSession?.id === sessionId) {
-                currentSessionShots.splice(
-                    currentSessionShots.findIndex((shot) => shot.id === shotSummaryId),
-                    1,
-                );
-            }
+            currentSessionShots.splice(
+                currentSessionShots.findIndex((shot) => shot.id === shotSummaryId),
+                1,
+            );
         } catch (error) {
             console.error("Error removing shot summary", error);
         } finally {
