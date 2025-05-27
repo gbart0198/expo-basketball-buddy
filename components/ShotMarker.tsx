@@ -5,6 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { ShotSummary } from "@/db";
 import { useDatabase } from "@/context/database-context";
 
+const SHOT_BASE_SIZE = 15;
+
 const ShotMarker = ({
     shot,
     courtWidth,
@@ -27,6 +29,9 @@ const ShotMarker = ({
         left: courtWidth * shot.x,
         top: courtHeight * shot.y,
     };
+
+    const shotScale = shot.attempts > 1 ? 2 : 1;
+
 
     console.log("Edit mode in ShotMarker:", edit);
 
@@ -95,6 +100,13 @@ const ShotMarker = ({
                                     ? COLORS.warning
                                     : COLORS.error,
                     },
+                    {
+                        width: SHOT_BASE_SIZE * shotScale,
+                        height: SHOT_BASE_SIZE * shotScale,
+                        left: -(SHOT_BASE_SIZE * shotScale) / 2,
+                        top: -(SHOT_BASE_SIZE * shotScale) / 2,
+                        borderRadius: (SHOT_BASE_SIZE * shotScale) / 2,
+                    }
                 ]}
             />
         </Pressable>
@@ -104,9 +116,15 @@ const ShotMarker = ({
 const styles = StyleSheet.create({
     shotMarker: {
         position: "absolute",
-        width: 20,
-        height: 20,
-        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: COLORS.textPrimary,
+        ...createShadow(2),
+    },
+    multipleShotMarker: { // make it 
+        position: "absolute",
+        width: 30,
+        height: 30,
+        borderRadius: 15,
         borderWidth: 2,
         borderColor: COLORS.textPrimary,
         ...createShadow(2),

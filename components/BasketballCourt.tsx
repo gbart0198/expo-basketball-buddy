@@ -64,15 +64,16 @@ const BasketballCourt = ({
     const handleCourtPress = (event: any) => {
         if (!selectedSession.id) return;
 
+        if (currentShot) {
+            setCurrentShot(null);
+            return;
+        }
+
         if (!edit) {
             console.warn("Edit mode is disabled. Cannot add shots.");
             return;
         }
 
-        if (currentShot) {
-            setCurrentShot(null);
-            return;
-        }
 
         let scaleX = 0;
         let scaleY = 0;
