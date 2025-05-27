@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Text,
     StatusBar,
+    Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -30,6 +31,7 @@ export default function ShotTrackerView() {
     const { timerValue, edit } = params;
     const insets = useSafeAreaInsets();
     const [isDesktop, setIsDesktop] = useState(false);
+    const [editMode, setEditMode] = useState(edit === "true");
     const [dimensions, setDimensions] = useState({
         window: Dimensions.get("window"),
     });
@@ -40,7 +42,25 @@ export default function ShotTrackerView() {
         return null;
     }
 
-    const editMode = edit === "true";
+    const activateEditMode = () => {
+        Alert.alert(
+            "Confirm Edit Mode",
+            "Would you like to enter edit mode for this session?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "Enter Edit Mode",
+                    onPress: () => {
+                        setEditMode(true);
+                        console.log("Edit mode is now: ", editMode);
+                    }
+                },
+            ])
+    }
+
 
     let madeShots = 0;
     let attemptedShots = 0;
@@ -105,9 +125,15 @@ export default function ShotTrackerView() {
                     </View>
                 </View>
 
-                <TouchableOpacity style={styles.iconButton} onPress={() => console.log("TODO: Undo Last Shot")}>
-                    <Ionicons name="arrow-undo" size={24} color={COLORS.textPrimary} />
-                </TouchableOpacity>
+                {editMode && (
+                    <TouchableOpacity style={styles.iconButton} onPress={() => console.log("TODO: Undo Last Shot")}>
+                        <Ionicons name="arrow-undo" size={24} color={COLORS.textPrimary} />
+                    </TouchableOpacity>
+                ) || (
+                        <TouchableOpacity style={styles.iconButton} onPress={activateEditMode}>
+                            <Ionicons name="create-outline" size={24} color={COLORS.textPrimary} />
+                        </TouchableOpacity>
+                    )}
             </View>
 
             <View style={styles.content}>

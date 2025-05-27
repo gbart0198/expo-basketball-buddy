@@ -37,8 +37,6 @@ const ShotMarker = ({
     const shotScale = shot.attempts > 1 ? 2 : 1;
 
 
-    console.log("Edit mode in ShotMarker:", edit);
-
     return (
         <Pressable
             onPress={handleShotPress}
@@ -77,14 +75,16 @@ const ShotMarker = ({
                                                 </Text>
                                             </View>
                                         </View>
-                                        <View style={styles.inputGroup}>
-                                            <Pressable style={styles.shotMarkerEditButton} onPress={() => alert("Edit shot feature is not implemented yet.")}>
-                                                <Text style={{ color: COLORS.textPrimary }}>Edit Shot</Text>
-                                            </Pressable>
-                                            <Pressable style={styles.shotMarkerDeleteButton} onPress={() => alert("Delete shot feature is not implemented yet.")}>
-                                                <Text style={{ color: COLORS.textPrimary }}>Delete Shot</Text>
-                                            </Pressable>
-                                        </View>
+                                        {edit && (
+                                            <View style={styles.inputGroup}>
+                                                <Pressable style={styles.shotMarkerEditButton} onPress={() => alert("Edit shot feature is not implemented yet.")}>
+                                                    <Text style={{ color: COLORS.textPrimary }}>Edit Shot</Text>
+                                                </Pressable>
+                                                <Pressable style={styles.shotMarkerDeleteButton} onPress={() => alert("Delete shot feature is not implemented yet.")}>
+                                                    <Text style={{ color: COLORS.textPrimary }}>Delete Shot</Text>
+                                                </Pressable>
+                                            </View>
+                                        )}
                                     </View>
                                 </View>
                             </Pressable>
