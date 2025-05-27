@@ -115,6 +115,7 @@ export default function ShotTrackerView() {
                     <BasketballCourt
                         isDesktop={isDesktop}
                         shots={selectedSession.shots || []}
+                        edit={editMode}
                     />
                 </View>
             </View>
@@ -122,13 +123,15 @@ export default function ShotTrackerView() {
             <View
                 style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}
             >
-                <TouchableOpacity
-                    style={[styles.actionButton, styles.endButton]}
-                    onPress={() => router.back()}
-                >
-                    <Ionicons name="exit-outline" size={20} color={COLORS.textPrimary} />
-                    <Text style={styles.actionText}>End Session</Text>
-                </TouchableOpacity>
+                {editMode && (
+                    <TouchableOpacity
+                        style={[styles.actionButton, styles.endButton]}
+                        onPress={() => router.back()}
+                    >
+                        <Ionicons name="exit-outline" size={20} color={COLORS.textPrimary} />
+                        <Text style={styles.actionText}>End Session</Text>
+                    </TouchableOpacity>
+                )}
             </View>
         </View>
     );

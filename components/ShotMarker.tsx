@@ -9,10 +9,12 @@ const ShotMarker = ({
     shot,
     courtWidth,
     courtHeight,
+    edit = true
 }: {
     shot: ShotSummary;
     courtWidth: number;
     courtHeight: number;
+    edit: boolean;
 }) => {
     const [renderShotPopup, setRenderShotPopup] = useState(false);
     const { removeShotSummary } = useDatabase();
@@ -25,6 +27,8 @@ const ShotMarker = ({
         left: courtWidth * shot.x,
         top: courtHeight * shot.y,
     };
+
+    console.log("Edit mode in ShotMarker:", edit);
 
     return (
         <Pressable
@@ -45,24 +49,31 @@ const ShotMarker = ({
                         },
                     ]}
                 >
-                    <Pressable
-                        onPress={(e) => {
-                            e.stopPropagation();
-                            removeShotSummary(shot.id);
-                            setRenderShotPopup(false);
-                        }}
-                    >
-                        <Ionicons
-                            name="trash-outline"
-                            size={16}
-                            color={COLORS.textPrimary}
-                            style={{
-                                backgroundColor: COLORS.error,
-                                borderRadius: 5000,
-                                padding: 5,
+                    {edit ? (
+                        <Pressable
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                removeShotSummary(shot.id);
+                                setRenderShotPopup(false);
                             }}
-                        />
-                    </Pressable>
+                        >
+                            <Ionicons
+                                name="trash-outline"
+                                size={16}
+                                color={COLORS.textPrimary}
+                                style={{
+                                    backgroundColor: COLORS.error,
+                                    borderRadius: 5000,
+                                    padding: 5,
+                                }}
+                            />
+                        </Pressable>
+
+                    ) : (
+                        <View style={styles.shotMarkerButton}>
+                            <Text>EDIT MODE DISABLED</Text>
+                        </View>
+                    )}
                 </View>
             )}
             <View

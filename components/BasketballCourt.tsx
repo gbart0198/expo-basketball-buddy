@@ -19,9 +19,11 @@ import { useDatabase } from "@/context/database-context";
 const BasketballCourt = ({
     isDesktop,
     shots,
+    edit = true,
 }: {
     isDesktop: boolean;
     shots: ShotSummary[];
+    edit: boolean;
 }) => {
     const { selectedSession, addShotSummary } = useDatabase();
     const [currentShot, setCurrentShot] = useState<CreateShotSummary | null>(null);
@@ -41,6 +43,8 @@ const BasketballCourt = ({
         return null;
     }
 
+    console.log("Edit mode in BasketballCourt:", edit);
+
     useEffect(() => {
         Animated.timing(fadeAnim, {
             toValue: currentShot ? 0.4 : 1,
@@ -59,6 +63,11 @@ const BasketballCourt = ({
 
     const handleCourtPress = (event: any) => {
         if (!selectedSession.id) return;
+
+        if (!edit) {
+            console.warn("Edit mode is disabled. Cannot add shots.");
+            return;
+        }
 
         if (currentShot) {
             setCurrentShot(null);
@@ -152,14 +161,17 @@ const BasketballCourt = ({
                     shot={shot}
                     courtHeight={size.height}
                     courtWidth={size.width}
+                    edit={edit}
                 />
             ))}
-            <AnimatedSwitch
-                onText="Single"
-                offText="Multiple"
-                isSwitched={isMultipleShotMode}
-                onPress={() => setIsMultipleShotMode((prev) => !prev)}
-            />
+            {edit && (
+                <AnimatedSwitch
+                    onText="Single"
+                    offText="Multiple"
+                    isSwitched={isMultipleShotMode}
+                    onPress={() => setIsMultipleShotMode((prev) => !prev)}
+                />
+            )}
         </View>
     );
 };
