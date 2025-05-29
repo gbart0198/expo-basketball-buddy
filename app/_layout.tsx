@@ -9,20 +9,21 @@ import migrations from "@/drizzle/migrations";
 import { useEffect } from "react";
 
 export default function TrackerLayout() {
-  const { success, error: migrationError } = useMigrations(db, migrations);
+    const { success, error: migrationError } = useMigrations(db, migrations);
 
-  useEffect(() => {
-    if (migrationError) throw migrationError;
-  }, [migrationError]);
 
-  return RootLayoutNav();
+    useEffect(() => {
+        if (migrationError) throw migrationError;
+    }, [migrationError]);
+
+    return RootLayoutNav();
 }
 
 function RootLayoutNav() {
-  return (
-    <DatabaseProvider>
-      <StatusBar style="light" backgroundColor={COLORS.background} />
-      <Slot />
-    </DatabaseProvider>
-  );
+    return (
+        <DatabaseProvider>
+            <StatusBar style="light" backgroundColor={COLORS.background} />
+            <Slot />
+        </DatabaseProvider>
+    );
 }

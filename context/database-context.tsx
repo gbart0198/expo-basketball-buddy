@@ -8,7 +8,7 @@ import {
     CreateSession,
     CreateShotSummary,
 } from "@/db";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export type SessionWithShots = Session & {
     shots?: ShotSummary[];
@@ -26,6 +26,7 @@ interface DatabaseContextType {
     removeShotSummary: (
         shotSummaryId: number
     ) => Promise<void>;
+    runSyncJob: () => Promise<void>;
 }
 
 const DatabaseContext = createContext<DatabaseContextType | null>(null);
@@ -143,6 +144,51 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    const runSyncJob = async () => {
+        const sessionUpdatesToSync = db.select().from(sessions).where(eq(sessions.isSynced, 0));
+        const sessionDeletesToSync = db.select().from(sessions)
+            .where(and(eq(sessions.isDeleted, 1), eq(sessions.isSynced, 0)));
+        const shotUpdatesToSync = db.select().from(shotSummaries).where(eq(shotSummaries.isSynced, 0));
+        const shotDeletesToSync = db.select().from(shotSummaries)
+            .where(and(eq(shotSummaries.isDeleted, 1), eq(shotSummaries.isSynced, 0)));
+
+        // await all and update the isSynced field
+        try {
+            const [sessionUpdates, sessionDeletes, shotUpdates, shotDeletes] = await Promise.all([
+                sessionUpdatesToSync,
+                sessionDeletesToSync,
+                shotUpdatesToSync,
+                shotDeletesToSync,
+            ]);
+            console.log("--------- Session Updates ---------", sessionUpdates);
+            console.log("--------- Session Deletes ---------", sessionDeletes);
+            console.log("--------- Shot Updates ---------", shotUpdates);
+            console.log("--------- Shot Deletes ---------", shotDeletes);
+
+            /* Update after the sync to supabase is finished
+            for (const session of sessionUpdates) {
+                await db.update(sessions).set({ isSynced: 1 }).where(eq(sessions.id, session.id));
+            }
+
+            for (const session of sessionDeletes) {
+                await db.delete(sessions).where(eq(sessions.id, session.id));
+            }
+
+            for (const shot of shotUpdates) {
+                await db.update(shotSummaries)
+                    .set({ isSynced: 1 })
+                    .where(eq(shotSummaries.id, shot.id));
+            }
+
+            for (const shot of shotDeletes) {
+                await db.delete(shotSummaries).where(eq(shotSummaries.id, shot.id));
+            }
+            */
+        } catch (error) {
+            console.error("Error syncing database", error);
+        }
+    }
+
     return (
         <DatabaseContext.Provider
             value={{
@@ -155,6 +201,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
                 removeSession,
                 addShotSummary,
                 removeShotSummary,
+                runSyncJob,
             }}
         >
             {children}

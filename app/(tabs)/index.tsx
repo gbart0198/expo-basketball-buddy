@@ -11,13 +11,13 @@ import {
     FONT_SIZE,
     createShadow,
 } from "@/theme";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CreateSessionModal from "@/components/CreateSessionModal";
 import { useDatabase } from "@/context/database-context";
 
 export default function HomeView() {
     const router = useRouter();
-    const { addSession } = useDatabase();
+    const { addSession, runSyncJob } = useDatabase();
     const [renderSessionPopup, setRenderSessionPopup] = useState(false);
     const onSessionCreate = async (
         sessionName: string,
@@ -38,6 +38,15 @@ export default function HomeView() {
             params,
         });
     };
+
+    useEffect(() => {
+        console.log("Starting sync job");
+        runSyncJob().then(() => {
+            console.log("Sync job completed");
+        }).catch((error) => {
+            console.error("Error during sync job:", error);
+        });
+    }, []);
 
     return (
         <PaddedSafeAreaView>
