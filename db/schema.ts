@@ -4,6 +4,8 @@ export const sessions = sqliteTable("sessions", {
     id: integer("id").primaryKey({ autoIncrement: true }),
     name: text("name").notNull(),
     date: text("date").notNull(),
+    isSynced: integer("isSynced").notNull().default(0),
+    isDeleted: integer("isDeleted").notNull().default(0),
 });
 
 export const shotSummaries = sqliteTable("shotSummaries", {
@@ -16,6 +18,8 @@ export const shotSummaries = sqliteTable("shotSummaries", {
     sessionId: integer("sessionId")
         .notNull()
         .references(() => sessions.id),
+    isSynced: integer("isSynced").notNull().default(0),
+    isDeleted: integer("isDeleted").notNull().default(0),
 });
 
 export type Session = typeof sessions.$inferInsert;
