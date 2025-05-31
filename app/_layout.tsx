@@ -5,24 +5,38 @@ import { DatabaseProvider } from "@/context/database-context";
 import { db } from "@/db";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import migrations from "@/drizzle/migrations";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Session } from "@supabase/supabase-js";
+import { supabase } from "@/utils/supabaseInit";
+import { View, Text } from "react-native";
+import Auth from "@/components/Auth";
 
 export default function TrackerLayout() {
-    const { success, error: migrationError } = useMigrations(db, migrations);
+  const { success, error: migrationError } = useMigrations(db, migrations);
+  const [session, setSession] = useState<Session | null>(null);
 
+  useEffect(() => {
+    if (migrationError) throw migrationError;
+  }, [migrationError]);
 
-    useEffect(() => {
-        if (migrationError) throw migrationError;
-    }, [migrationError]);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+  }, []);
 
-    return RootLayoutNav();
-}
-
-function RootLayoutNav() {
-    return (
-        <DatabaseProvider>
-            <StatusBar style="light" backgroundColor={COLORS.background} />
-            <Slot />
-        </DatabaseProvider>
-    );
+  return (
+    <DatabaseProvider>
+      {session && session.user && (
+        <>
+          <StatusBar style="light" backgroundColor={COLORS.background} />
+          <Slot />
+        </>
+      )}
+      {(!session || !session.user) && <Auth />}
+    </DatabaseProvider>
+  );
 }
