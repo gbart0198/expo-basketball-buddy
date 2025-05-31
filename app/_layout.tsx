@@ -8,7 +8,6 @@ import migrations from "@/drizzle/migrations";
 import { useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/utils/supabaseInit";
-import { View, Text } from "react-native";
 import Auth from "@/components/Auth";
 
 export default function TrackerLayout() {

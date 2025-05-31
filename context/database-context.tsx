@@ -3,10 +3,13 @@ import {
   db,
   sessions,
   shotSummaries,
+  goals,
   Session,
   ShotSummary,
+  Goal,
   CreateSession,
   CreateShotSummary,
+  CreateGoal,
 } from "@/db";
 import { and, eq, inArray } from "drizzle-orm";
 import { syncDbDeletes, syncDbUpserts } from "@/utils/syncDb";
@@ -18,6 +21,7 @@ export type SessionWithShots = Session & {
 interface DatabaseContextType {
   isLoading: boolean;
   sessionsList: SessionWithShots[];
+  goalsList: Goal[];
   selectedSession: SessionWithShots | null;
   setSelectedSession: (session: SessionWithShots) => void;
   currentSessionShots: ShotSummary[];
@@ -29,6 +33,8 @@ interface DatabaseContextType {
     shotSummaryData: CreateShotSummary,
   ) => Promise<ShotSummary | undefined>;
   removeShotSummary: (shotSummaryId: number) => Promise<void>;
+  addGoal: (goalData: CreateGoal) => Promise<Goal | undefined>;
+  removeGoal: (goalId: number) => Promise<void>;
   runSyncJob: () => Promise<void>;
 }
 
@@ -36,6 +42,7 @@ const DatabaseContext = createContext<DatabaseContextType | null>(null);
 
 export function DatabaseProvider({ children }: { children: React.ReactNode }) {
   const [sessionsList, setSessionsList] = useState<SessionWithShots[]>([]);
+  const [goalsList, setGoalsList] = useState<Goal[]>([]);
   const [selectedSession, setSelectedSession] =
     useState<SessionWithShots | null>(null);
   const currentSessionShots = selectedSession?.shots || [];
@@ -77,6 +84,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     loadSessions();
+    loadGoals();
   }, []);
 
   const addSession = async (
@@ -165,6 +173,49 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const loadGoals = async () => {
+    try {
+      setIsLoading(true);
+      const allGoals = await db
+        .select()
+        .from(goals)
+        .where(eq(goals.isDeleted, 0));
+      setGoalsList(allGoals);
+    } catch (error) {
+      console.error("Error loading goals", error);
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addGoal = async (goalData: CreateGoal): Promise<Goal | undefined> => {
+    try {
+      setIsLoading(true);
+      const newGoal = await db.insert(goals).values(goalData).returning();
+      if (newGoal.length <= 0) throw new Error("Failed to add new goal");
+      return newGoal[0];
+    } catch (error) {
+      console.error("Error adding goal", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const removeGoal = async (goalId: number) => {
+    try {
+      setIsLoading(true);
+      await db
+        .update(goals)
+        .set({ isDeleted: 1, isSynced: 0 })
+        .where(eq(goals.id, goalId));
+    } catch (error) {
+      console.error("Error removing goal", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const runSyncJob = async () => {
     console.log("Running sync job...");
     const sessionSelectSchema = {
@@ -180,6 +231,17 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
       x: shotSummaries.x,
       y: shotSummaries.y,
       lastShotAt: shotSummaries.lastShotAt,
+    };
+    const goalSelectSchema = {
+      id: goals.id,
+      goalType: goals.goalType,
+      aggregationType: goals.aggregationType,
+      targetValue: goals.targetValue,
+      timePeriodStart: goals.timePeriodStart,
+      timePeriodEnd: goals.timePeriodEnd,
+      isCompleted: goals.isCompleted,
+      createdAt: goals.createdAt,
+      updatedAt: goals.updatedAt,
     };
     const sessionUpdatesToSync = db
       .select(sessionSelectSchema)
@@ -201,16 +263,32 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
       .where(
         and(eq(shotSummaries.isDeleted, 1), eq(shotSummaries.isSynced, 0)),
       );
+    const goalUpdatesToSync = db
+      .select(goalSelectSchema)
+      .from(goals)
+      .where(and(eq(goals.isSynced, 0), eq(goals.isDeleted, 0)));
+    const goalDeletesToSync = db
+      .select(goalSelectSchema)
+      .from(goals)
+      .where(and(eq(goals.isDeleted, 1), eq(goals.isSynced, 0)));
 
     // await all and update the isSynced field
     try {
-      const [sessionUpdates, sessionDeletes, shotUpdates, shotDeletes] =
-        await Promise.all([
-          sessionUpdatesToSync,
-          sessionDeletesToSync,
-          shotUpdatesToSync,
-          shotDeletesToSync,
-        ]);
+      const [
+        sessionUpdates,
+        sessionDeletes,
+        shotUpdates,
+        shotDeletes,
+        goalUpdates,
+        goalDeletes,
+      ] = await Promise.all([
+        sessionUpdatesToSync,
+        sessionDeletesToSync,
+        shotUpdatesToSync,
+        shotDeletesToSync,
+        goalUpdatesToSync,
+        goalDeletesToSync,
+      ]);
       const upsertedSessions = await syncDbUpserts(sessionUpdates, "sessions");
       await db
         .update(sessions)
@@ -252,6 +330,28 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
           inArray(
             shotSummaries.id,
             shotDeletes.map((s) => s.id),
+          ),
+        );
+
+      const upsertedGoals = await syncDbUpserts(goalUpdates, "goals");
+      await db
+        .update(goals)
+        .set({ isSynced: 1 })
+        .where(
+          inArray(
+            goals.id,
+            upsertedGoals.map((g) => g.id),
+          ),
+        );
+
+      await syncDbDeletes(goalDeletes, "goals");
+      await db
+        .update(goals)
+        .set({ isSynced: 1 })
+        .where(
+          inArray(
+            goals.id,
+            goalDeletes.map((g) => g.id),
           ),
         );
 
