@@ -8,7 +8,8 @@ import {
     CreateSession,
     CreateShotSummary,
 } from "@/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
+import { syncDbDeletes, syncDbUpserts } from "@/utils/syncDb";
 
 export type SessionWithShots = Session & {
     shots?: ShotSummary[];
@@ -145,11 +146,26 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
     };
 
     const runSyncJob = async () => {
-        const sessionUpdatesToSync = db.select().from(sessions).where(eq(sessions.isSynced, 0));
-        const sessionDeletesToSync = db.select().from(sessions)
+        console.log("Running sync job...");
+        const sessionSelectSchema = {
+            id: sessions.id,
+            name: sessions.name,
+            date: sessions.date,
+        }
+        const shotSelectSchema = {
+            id: shotSummaries.id,
+            sessionId: shotSummaries.sessionId,
+            makes: shotSummaries.makes,
+            attempts: shotSummaries.attempts,
+            x: shotSummaries.x,
+            y: shotSummaries.y,
+            lastShotAt: shotSummaries.lastShotAt,
+        };
+        const sessionUpdatesToSync = db.select(sessionSelectSchema).from(sessions).where(eq(sessions.isSynced, 0))
+        const sessionDeletesToSync = db.select(sessionSelectSchema).from(sessions)
             .where(and(eq(sessions.isDeleted, 1), eq(sessions.isSynced, 0)));
-        const shotUpdatesToSync = db.select().from(shotSummaries).where(eq(shotSummaries.isSynced, 0));
-        const shotDeletesToSync = db.select().from(shotSummaries)
+        const shotUpdatesToSync = db.select(shotSelectSchema).from(shotSummaries).where(eq(shotSummaries.isSynced, 0));
+        const shotDeletesToSync = db.select(shotSelectSchema).from(shotSummaries)
             .where(and(eq(shotSummaries.isDeleted, 1), eq(shotSummaries.isSynced, 0)));
 
         // await all and update the isSynced field
@@ -160,30 +176,31 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
                 shotUpdatesToSync,
                 shotDeletesToSync,
             ]);
-            console.log("--------- Session Updates ---------", sessionUpdates);
-            console.log("--------- Session Deletes ---------", sessionDeletes);
-            console.log("--------- Shot Updates ---------", shotUpdates);
-            console.log("--------- Shot Deletes ---------", shotDeletes);
+            const upsertedSessions = await syncDbUpserts(sessionUpdates, 'sessions')
+            await db
+                .update(sessions)
+                .set({ isSynced: 1 })
+                .where(inArray(sessions.id, upsertedSessions.map((s) => s.id)))
 
-            /* Update after the sync to supabase is finished
-            for (const session of sessionUpdates) {
-                await db.update(sessions).set({ isSynced: 1 }).where(eq(sessions.id, session.id));
-            }
+            await syncDbDeletes(sessionDeletes, 'sessions')
+            await db
+                .update(sessions)
+                .set({ isSynced: 1 })
+                .where(inArray(sessions.id, sessionDeletes.map((s) => s.id)))
 
-            for (const session of sessionDeletes) {
-                await db.delete(sessions).where(eq(sessions.id, session.id));
-            }
+            const upsertedShots = await syncDbUpserts(shotUpdates, 'shotSummaries')
+            await db
+                .update(shotSummaries)
+                .set({ isSynced: 1 })
+                .where(inArray(shotSummaries.id, upsertedShots.map((s) => s.id)))
 
-            for (const shot of shotUpdates) {
-                await db.update(shotSummaries)
-                    .set({ isSynced: 1 })
-                    .where(eq(shotSummaries.id, shot.id));
-            }
+            await syncDbDeletes(shotDeletes, 'shotSummaries')
+            await db
+                .update(shotSummaries)
+                .set({ isSynced: 1 })
+                .where(inArray(shotSummaries.id, shotDeletes.map((s) => s.id)))
 
-            for (const shot of shotDeletes) {
-                await db.delete(shotSummaries).where(eq(shotSummaries.id, shot.id));
-            }
-            */
+            console.log("Sync job completed successfully");
         } catch (error) {
             console.error("Error syncing database", error);
         }

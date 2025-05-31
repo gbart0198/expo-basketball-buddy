@@ -1,4 +1,3 @@
-// app/_layout.tsx
 import { Slot } from "expo-router";
 import { COLORS } from "@/theme";
 import { StatusBar } from "expo-status-bar";

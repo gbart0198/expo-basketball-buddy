@@ -1,4 +1,5 @@
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import 'react-native-url-polyfill';
 
 import PaddedSafeAreaView from "@/components/PaddedSafeAreaView";
 import ProgressBar from "@/components/ProgressBar";
@@ -39,15 +40,6 @@ export default function HomeView() {
         });
     };
 
-    useEffect(() => {
-        console.log("Starting sync job");
-        runSyncJob().then(() => {
-            console.log("Sync job completed");
-        }).catch((error) => {
-            console.error("Error during sync job:", error);
-        });
-    }, []);
-
     return (
         <PaddedSafeAreaView>
             {renderSessionPopup && (
@@ -58,7 +50,13 @@ export default function HomeView() {
                 />
             )}
             <Text style={styles.title}>Welcome</Text>
-            <Text style={styles.heading}>Recent Sessions</Text>
+            <View style={styles.subHeadingContainer}>
+                <Text style={styles.heading}>Recent Sessions</Text>
+
+                <Pressable style={styles.headingButton} onPress={() => runSyncJob()}>
+                    <Text style={styles.headingButtonText}>Sync Database</Text>
+                </Pressable>
+            </View>
             <FlatList
                 style={styles.list}
                 data={data}
@@ -194,5 +192,22 @@ const styles = StyleSheet.create({
         color: COLORS.textSecondary,
         textAlign: "right",
         marginTop: SPACING.xs,
+    },
+    subHeadingContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: SPACING.md,
+    },
+    headingButton: {
+        backgroundColor: COLORS.primaryAccent,
+        padding: SPACING.sm,
+        borderRadius: BORDER_RADIUS.md,
+        ...createShadow(2),
+    },
+    headingButtonText: {
+        fontSize: FONT_SIZE.sm,
+        color: COLORS.textPrimary,
+        fontWeight: 600,
     },
 });
