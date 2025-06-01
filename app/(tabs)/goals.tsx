@@ -1,31 +1,12 @@
 import PaddedSafeAreaView from "@/components/PaddedSafeAreaView";
 import { Text, StyleSheet, FlatList, View, Pressable } from "react-native";
 import { FONT_SIZE, COLORS, SPACING, BORDER_RADIUS } from "@/theme";
-import ProgressBar from "@/components/ProgressBar";
 import { Ionicons } from "@expo/vector-icons";
+import { GoalCard } from "@/components/GoalCard";
 
 export default function GoalsView() {
   const completedGoals = data.filter((goal) => goal.isCompleted);
   const inProgressGoals = data.filter((goal) => !goal.isCompleted);
-  const renderDate = (date: string) => {
-    const options: Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    };
-    try {
-      const formattedDate = new Date(date).toLocaleDateString("en-US", options);
-      return formattedDate;
-    } catch (error) {
-      console.error("Error parsing date:", error);
-      return "Invalid Date";
-    }
-  };
-
-  const handleOpenGoalDetails = (goalId: number) => {
-    // Logic to open goal details
-    alert(`Open Goal Details for ID: ${goalId}`);
-  };
   return (
     <PaddedSafeAreaView>
       <View style={styles.heading}>
@@ -45,39 +26,7 @@ export default function GoalsView() {
         <FlatList
           style={styles.list}
           data={inProgressGoals}
-          renderItem={({ item }) => (
-            <View style={styles.goalContainer}>
-              <View style={styles.goalMainContent}>
-                <View style={styles.goalWrapper}>
-                  <View style={styles.goalHeader}>
-                    <Text style={styles.goalText}>{item.goalName}</Text>
-                    <Text style={styles.goalFinishDate}>
-                      {renderDate(item.timePeriodEnd)}
-                    </Text>
-                    <Text style={styles.progressText}>
-                      {item.currentValue}/{item.targetValue}
-                    </Text>
-                  </View>
-                  <ProgressBar
-                    progress={item.currentValue / item.targetValue}
-                    color={COLORS.primaryAccent}
-                  />
-                  <Ionicons
-                    name="chevron-forward-outline"
-                    size={16}
-                    color={COLORS.textSecondary}
-                    style={{ alignSelf: "flex-end" }}
-                    onPress={() => handleOpenGoalDetails(item.id)}
-                  />
-                </View>
-              </View>
-              <View style={styles.goalDetails}>
-                <Text style={styles.goalDetailsText}>
-                  Type: {item.goalType} | Aggregation: {item.aggregationType}
-                </Text>
-              </View>
-            </View>
-          )}
+          renderItem={({ item }) => <GoalCard item={item} />}
           keyExtractor={(item, index) => index.toString()}
         />
       </View>
@@ -86,32 +35,7 @@ export default function GoalsView() {
         <FlatList
           style={styles.list}
           data={completedGoals}
-          renderItem={({ item }) => (
-            <View style={styles.goalMainContent}>
-              <View style={styles.goalWrapper}>
-                <View style={styles.goalHeader}>
-                  <Text style={styles.goalText}>{item.goalName}</Text>
-                  <Text style={styles.goalFinishDate}>
-                    {renderDate(item.timePeriodEnd)}
-                  </Text>
-                  <Text style={styles.progressText}>
-                    {item.currentValue}/{item.targetValue}
-                  </Text>
-                </View>
-                <ProgressBar
-                  progress={item.currentValue / item.targetValue}
-                  color={COLORS.primaryAccent}
-                />
-                <Ionicons
-                  name="chevron-down-outline"
-                  size={16}
-                  color={COLORS.textSecondary}
-                  style={{ alignSelf: "flex-end" }}
-                  onPress={() => handleOpenGoalDetails(item.id)}
-                />
-              </View>
-            </View>
-          )}
+          renderItem={({ item }) => <GoalCard item={item} />}
           keyExtractor={(item, index) => index.toString()}
         />
       </View>
@@ -155,53 +79,6 @@ const styles = StyleSheet.create({
   list: {
     width: "100%",
   },
-  listItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: COLORS.cardBackground,
-    borderRadius: 8,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    marginBlockEnd: SPACING.sm,
-  },
-  progressText: {
-    fontSize: FONT_SIZE.sm,
-    color: COLORS.textSecondary,
-    textAlign: "right",
-  },
-  goalWrapper: {
-    flex: 1,
-    flexDirection: "column",
-    marginLeft: SPACING.md,
-  },
-  goalMainContent: {
-    padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.md,
-    margin: SPACING.sm,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  goalText: {
-    fontSize: FONT_SIZE.lg,
-    fontWeight: 700,
-    color: COLORS.textPrimary,
-  },
-  goalDetailsText: {
-    fontSize: FONT_SIZE.sm,
-    color: COLORS.textSecondary,
-  },
-  goalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: SPACING.sm,
-  },
-  goalFinishDate: {
-    fontSize: FONT_SIZE.sm,
-    color: COLORS.textSecondary,
-    marginLeft: SPACING.sm,
-  },
   headingButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -214,18 +91,6 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZE.sm,
     fontWeight: "600",
     marginRight: SPACING.sm,
-  },
-  goalContainer: {
-    backgroundColor: COLORS.cardBackground,
-    borderRadius: BORDER_RADIUS.md,
-    marginBottom: SPACING.sm,
-  },
-  goalDetails: {
-    padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.md,
-    margin: SPACING.sm,
-    flexDirection: "row",
-    alignItems: "center",
   },
 });
 
