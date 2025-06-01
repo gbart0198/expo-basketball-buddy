@@ -3,11 +3,13 @@ import { Text, StyleSheet, FlatList, View, Pressable } from "react-native";
 import { FONT_SIZE, COLORS, SPACING, BORDER_RADIUS } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { GoalCard } from "@/components/GoalCard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateGoalModal } from "@/components/CreateGoalModal";
 import { CreateGoal } from "@/db";
+import { useDatabase } from "@/context/database-context";
 
 export default function GoalsView() {
+  const { addGoal, removeGoal, goalsList } = useDatabase();
   const completedGoals = data.filter((goal) => goal.isCompleted);
   const inProgressGoals = data.filter((goal) => !goal.isCompleted);
   const [renderCreateGoalPopup, setRenderCreateGoalPopup] = useState(false);
@@ -16,13 +18,18 @@ export default function GoalsView() {
     if (goal) {
       // Here you would typically call a function to save the goal to your database
       // For example: saveGoalToDatabase(goal);
-      console.log("Goal created:", goal);
-      alert("Goal created successfully!");
+      addGoal(goal);
     } else {
       console.log("Goal creation cancelled");
     }
     setRenderCreateGoalPopup(false);
   };
+
+  useEffect(() => {
+    // This effect runs whenever goalsList changes, you can use it to perform side effects
+    // like fetching data or updating the UI based on the new goalsList.
+    console.log("Goals list updated, new length:", goalsList.length);
+  }, [goalsList]);
 
   return (
     <PaddedSafeAreaView>

@@ -193,8 +193,12 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true);
       const newGoal = await db.insert(goals).values(goalData).returning();
-      if (newGoal.length <= 0) throw new Error("Failed to add new goal");
-      return newGoal[0];
+      if (newGoal.length > 0) {
+        setGoalsList((prev) => [...prev, newGoal[0]]);
+        return newGoal[0];
+      } else {
+        throw new Error("Failed to add new goal");
+      }
     } catch (error) {
       console.error("Error adding goal", error);
     } finally {
@@ -209,6 +213,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
         .update(goals)
         .set({ isDeleted: 1, isSynced: 0 })
         .where(eq(goals.id, goalId));
+      setGoalsList((prev) => prev.filter((goal) => goal.id !== goalId));
     } catch (error) {
       console.error("Error removing goal", error);
     } finally {
@@ -234,6 +239,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
     };
     const goalSelectSchema = {
       id: goals.id,
+      goalName: goals.goalName,
       goalType: goals.goalType,
       aggregationType: goals.aggregationType,
       targetValue: goals.targetValue,
@@ -374,6 +380,9 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
         addShotSummary,
         removeShotSummary,
         runSyncJob,
+        addGoal,
+        removeGoal,
+        goalsList,
       }}
     >
       {children}
