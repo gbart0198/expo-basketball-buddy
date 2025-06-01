@@ -3,21 +3,47 @@ import { Text, StyleSheet, FlatList, View, Pressable } from "react-native";
 import { FONT_SIZE, COLORS, SPACING, BORDER_RADIUS } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { GoalCard } from "@/components/GoalCard";
+import { useState } from "react";
+import { CreateGoalModal } from "@/components/CreateGoalModal";
+import { CreateGoal } from "@/db";
 
 export default function GoalsView() {
   const completedGoals = data.filter((goal) => goal.isCompleted);
   const inProgressGoals = data.filter((goal) => !goal.isCompleted);
+  const [renderCreateGoalPopup, setRenderCreateGoalPopup] = useState(false);
+
+  const onCreateGoal = (goal?: CreateGoal) => {
+    if (goal) {
+      // Here you would typically call a function to save the goal to your database
+      // For example: saveGoalToDatabase(goal);
+      console.log("Goal created:", goal);
+      alert("Goal created successfully!");
+    } else {
+      console.log("Goal creation cancelled");
+    }
+    setRenderCreateGoalPopup(false);
+  };
+
   return (
     <PaddedSafeAreaView>
+      {renderCreateGoalPopup && (
+        <CreateGoalModal
+          visible={renderCreateGoalPopup}
+          setModalRender={setRenderCreateGoalPopup}
+          onCloseCallback={onCreateGoal}
+        />
+      )}
       <View style={styles.heading}>
         <Text style={styles.title}>My Goals</Text>
-        <Pressable style={styles.headingButton}>
+        <Pressable
+          style={styles.headingButton}
+          onPress={() => setRenderCreateGoalPopup(true)}
+        >
           <Text style={styles.headingButtonText}>Create Goal</Text>
           <Ionicons
             name="add-circle-outline"
             size={18}
             color={COLORS.background}
-            onPress={() => alert("Open Create Goal Modal")}
           />
         </Pressable>
       </View>
