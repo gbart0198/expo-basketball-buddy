@@ -24,6 +24,7 @@ export const shotSummaries = sqliteTable("shotSummaries", {
 
 export const goals = sqliteTable("goals", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  goalName: text("goalName").notNull(),
   goalType: text("goalType").notNull(),
   aggregationType: text("aggregationType").notNull(),
   targetValue: integer("targetValue").notNull(),
