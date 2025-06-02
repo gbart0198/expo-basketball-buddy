@@ -2,8 +2,29 @@ import { View, Text, StyleSheet } from "react-native";
 import ProgressBar from "./ProgressBar";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, BORDER_RADIUS, SPACING, FONT_SIZE } from "@/theme";
+import { Goal } from "@/db";
+import { useEffect, useState } from "react";
+import { getGoalCurrentValue } from "@/utils/goalUtil";
+import LoadingSpinner from "./LoadingSpinner";
 
-export const GoalCard = ({ item }: { item: any }) => {
+export const GoalCard = ({ item }: { item: Goal }) => {
+  const [currentValue, setCurrentValue] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  useEffect(() => {
+    const fetchCurrentValue = async () => {
+      try {
+        setIsLoading(true);
+        const value = await getGoalCurrentValue();
+        console.log("Current Value:", value);
+        setCurrentValue(value);
+      } catch (error) {
+        console.error("Error fetching current value:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCurrentValue();
+  }, [item]);
   const renderDate = (date: string) => {
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
@@ -25,28 +46,32 @@ export const GoalCard = ({ item }: { item: any }) => {
   return (
     <View style={styles.goalContainer}>
       <View style={styles.goalMainContent}>
-        <View style={styles.goalWrapper}>
-          <View style={styles.goalHeader}>
-            <Text style={styles.goalText}>{item.goalName}</Text>
-            <Text style={styles.goalFinishDate}>
-              {renderDate(item.timePeriodEnd)}
-            </Text>
-            <Text style={styles.progressText}>
-              {item.currentValue}/{item.targetValue}
-            </Text>
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <View style={styles.goalWrapper}>
+            <View style={styles.goalHeader}>
+              <Text style={styles.goalText}>{item.goalName}</Text>
+              <Text style={styles.goalFinishDate}>
+                {renderDate(item.timePeriodEnd)}
+              </Text>
+              <Text style={styles.progressText}>
+                {currentValue}/{item.targetValue}
+              </Text>
+            </View>
+            <ProgressBar
+              progress={currentValue ? currentValue / item.targetValue : 0}
+              color={COLORS.primaryAccent}
+            />
+            <Ionicons
+              name="chevron-forward-outline"
+              size={16}
+              color={COLORS.textSecondary}
+              style={{ alignSelf: "flex-end" }}
+              onPress={() => handleOpenGoalDetails(item.id)}
+            />
           </View>
-          <ProgressBar
-            progress={item.currentValue / item.targetValue}
-            color={COLORS.primaryAccent}
-          />
-          <Ionicons
-            name="chevron-forward-outline"
-            size={16}
-            color={COLORS.textSecondary}
-            style={{ alignSelf: "flex-end" }}
-            onPress={() => handleOpenGoalDetails(item.id)}
-          />
-        </View>
+        )}
       </View>
       <View style={styles.goalDetails}>
         <Text style={styles.goalDetailsText}>

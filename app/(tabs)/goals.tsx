@@ -10,8 +10,8 @@ import { useDatabase } from "@/context/database-context";
 
 export default function GoalsView() {
   const { addGoal, removeGoal, goalsList } = useDatabase();
-  const completedGoals = data.filter((goal) => goal.isCompleted);
-  const inProgressGoals = data.filter((goal) => !goal.isCompleted);
+  const completedGoals = goalsList.filter((goal) => goal.isCompleted);
+  const inProgressGoals = goalsList.filter((goal) => !goal.isCompleted);
   const [renderCreateGoalPopup, setRenderCreateGoalPopup] = useState(false);
 
   const onCreateGoal = (goal?: CreateGoal) => {
@@ -24,12 +24,6 @@ export default function GoalsView() {
     }
     setRenderCreateGoalPopup(false);
   };
-
-  useEffect(() => {
-    // This effect runs whenever goalsList changes, you can use it to perform side effects
-    // like fetching data or updating the UI based on the new goalsList.
-    console.log("Goals list updated, new length:", goalsList.length);
-  }, [goalsList]);
 
   return (
     <PaddedSafeAreaView>
