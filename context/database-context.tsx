@@ -35,6 +35,9 @@ interface DatabaseContextType {
   removeShotSummary: (shotSummaryId: number) => Promise<void>;
   addGoal: (goalData: CreateGoal) => Promise<Goal | undefined>;
   removeGoal: (goalId: number) => Promise<void>;
+  removeAllSessions: () => Promise<void>;
+  removeAllGoals: () => Promise<void>;
+  removeAllShots: () => Promise<void>;
   runSyncJob: () => Promise<void>;
 }
 
@@ -367,6 +370,44 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const removeAllSessions = async () => {
+    try {
+      setIsLoading(true);
+      await db.update(sessions).set({ isDeleted: 1, isSynced: 0 });
+      setSessionsList([]);
+    } catch (error) {
+      console.error("Error removing all sessions", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const removeAllGoals = async () => {
+    try {
+      setIsLoading(true);
+      await db.update(goals).set({ isDeleted: 1, isSynced: 0 });
+      setGoalsList([]);
+    } catch (error) {
+      console.error("Error removing all goals", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const removeAllShots = async () => {
+    try {
+      setIsLoading(true);
+      await db.update(shotSummaries).set({ isDeleted: 1, isSynced: 0 });
+      if (selectedSession) {
+        selectedSession.shots = [];
+      }
+    } catch (error) {
+      console.error("Error removing all shots", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <DatabaseContext.Provider
       value={{
@@ -383,6 +424,9 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
         addGoal,
         removeGoal,
         goalsList,
+        removeAllSessions,
+        removeAllGoals,
+        removeAllShots,
       }}
     >
       {children}

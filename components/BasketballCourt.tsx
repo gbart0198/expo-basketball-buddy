@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import {
-    View,
-    Animated,
-    Pressable,
-    Platform,
-    StyleSheet,
-    Dimensions,
-    ActivityIndicator,
+  View,
+  Animated,
+  Pressable,
+  Platform,
+  StyleSheet,
+  Dimensions,
+  ActivityIndicator,
+  Text,
 } from "react-native";
 import { Image } from "expo-image";
 import ShotPopup from "./ShotPopup";
@@ -15,237 +16,264 @@ import ShotMarker from "./ShotMarker";
 import AnimatedSwitch from "./AnimatedSwitch";
 import { CreateShotSummary, ShotSummary } from "@/db";
 import { useDatabase } from "@/context/database-context";
+import { getZoneForPoint } from "@/utils/zones";
+import DebugZoneOverlay from "./DebugCourt";
 
 const BasketballCourt = ({
-    isDesktop,
-    shots,
-    edit = true,
+  isDesktop,
+  shots,
+  edit = true,
 }: {
-    isDesktop: boolean;
-    shots: ShotSummary[];
-    edit: boolean;
+  isDesktop: boolean;
+  shots: ShotSummary[];
+  edit: boolean;
 }) => {
-    const { selectedSession, addShotSummary } = useDatabase();
-    const [currentShot, setCurrentShot] = useState<CreateShotSummary | null>(null);
-    const [isMultipleShotMode, setIsMultipleShotMode] = useState(false);
-    const [size, setSize] = useState({ width: 0, height: 0 });
-    const fadeAnim = useRef(new Animated.Value(1)).current;
-    const [imageLoaded, setImageLoaded] = useState(false);
-    const dimensions = Dimensions.get("window");
+  const { selectedSession, addShotSummary } = useDatabase();
+  const [currentShot, setCurrentShot] = useState<CreateShotSummary | null>(
+    null,
+  );
+  const [showZones, setShowZones] = useState(false);
+  const [isMultipleShotMode, setIsMultipleShotMode] = useState(false);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const dimensions = Dimensions.get("window");
 
-    const handleLayout = (event: any) => {
-        const { width, height } = event.nativeEvent.layout;
-        setSize({ width, height });
-    };
+  const handleLayout = (event: any) => {
+    const { width, height } = event.nativeEvent.layout;
+    setSize({ width, height });
+  };
 
-    if (!selectedSession || !selectedSession.id) {
-        console.error("No session selected or session ID is missing.");
-        return null;
+  if (!selectedSession || !selectedSession.id) {
+    console.error("No session selected or session ID is missing.");
+    return null;
+  }
+
+  console.log("Edit mode in BasketballCourt:", edit);
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: currentShot ? 0.4 : 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [currentShot, fadeAnim]);
+
+  const handleShot = (attempts: number, makes: number) => {
+    if (!currentShot) return;
+    currentShot.attempts = attempts;
+    currentShot.makes = makes;
+    const createdShot = addShotSummary(currentShot);
+    setCurrentShot(null);
+  };
+
+  const handleCourtPress = (event: any) => {
+    if (!selectedSession.id) return;
+
+    if (currentShot) {
+      setCurrentShot(null);
+      return;
     }
 
-    console.log("Edit mode in BasketballCourt:", edit);
+    if (!edit) {
+      console.warn("Edit mode is disabled. Cannot add shots.");
+      return;
+    }
 
-    useEffect(() => {
-        Animated.timing(fadeAnim, {
-            toValue: currentShot ? 0.4 : 1,
-            duration: 300,
-            useNativeDriver: true,
-        }).start();
-    }, [currentShot, fadeAnim]);
+    let scaleX = 0;
+    let scaleY = 0;
 
-    const handleShot = (attempts: number, makes: number) => {
-        if (!currentShot) return;
-        currentShot.attempts = attempts;
-        currentShot.makes = makes;
-        const createdShot = addShotSummary(currentShot);
-        setCurrentShot(null);
+    if (Platform.OS === "web") {
+      const nativeEvent = event.nativeEvent;
+      const rect = event.currentTarget.getBoundingClientRect();
+      const locationX = nativeEvent.clientX - rect.left;
+      const locationY = nativeEvent.clientY - rect.top;
+      scaleX = locationX / rect.width;
+      scaleY = locationY / rect.height;
+    } else {
+      const { locationX: x, locationY: y } = event.nativeEvent;
+      const width = size.width;
+      const height = size.height;
+      scaleX = x / width;
+      scaleY = y / height;
+    }
+
+    const shot: CreateShotSummary = {
+      sessionId: selectedSession.id,
+      x: scaleX,
+      y: scaleY,
+      makes: 0,
+      attempts: 1,
+      lastShotAt: new Date().toISOString(),
     };
 
-    const handleCourtPress = (event: any) => {
-        if (!selectedSession.id) return;
+    const zone = getZoneForPoint(scaleX, scaleY);
+    console.log("Shot zone:", zone);
 
-        if (currentShot) {
-            setCurrentShot(null);
-            return;
-        }
+    setCurrentShot(shot);
+  };
 
-        if (!edit) {
-            console.warn("Edit mode is disabled. Cannot add shots.");
-            return;
-        }
+  const getMobileStyles = () => {
+    const isSmallDevice = dimensions.width < 375;
+    const sidePadding = isSmallDevice ? SPACING.sm : SPACING.md;
 
-
-        let scaleX = 0;
-        let scaleY = 0;
-
-        if (Platform.OS === "web") {
-            const nativeEvent = event.nativeEvent;
-            const rect = event.currentTarget.getBoundingClientRect();
-            const locationX = nativeEvent.clientX - rect.left;
-            const locationY = nativeEvent.clientY - rect.top;
-            scaleX = locationX / rect.width;
-            scaleY = locationY / rect.height;
-        } else {
-            const { locationX: x, locationY: y } = event.nativeEvent;
-            const width = size.width;
-            const height = size.height;
-            scaleX = x / width;
-            scaleY = y / height;
-        }
-
-        const shot: CreateShotSummary = {
-            sessionId: selectedSession.id,
-            x: scaleX,
-            y: scaleY,
-            makes: 0,
-            attempts: 1,
-            lastShotAt: new Date().toISOString(),
-        };
-
-        setCurrentShot(shot);
+    return {
+      width: dimensions.width - sidePadding * 2,
+      height: dimensions.width * 1.5,
+      marginVertical: SPACING.md,
     };
+  };
 
-    const getMobileStyles = () => {
-        const isSmallDevice = dimensions.width < 375;
-        const sidePadding = isSmallDevice ? SPACING.sm : SPACING.md;
+  return (
+    <View
+      style={[
+        styles.courtContainer,
+        isDesktop ? styles.desktopCourtContainer : styles.mobileCourtContainer,
+        !isDesktop && Platform.OS !== "web" && getMobileStyles(),
+      ]}
+      onLayout={handleLayout}
+    >
+      <Animated.View
+        style={{
+          opacity: fadeAnim,
+          ...StyleSheet.flatten(styles.courtImage),
+        }}
+      >
+        {!imageLoaded && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={COLORS.primaryAccent} />
+          </View>
+        )}
+        <Image
+          source={require("@/assets/images/court.jpg")}
+          style={StyleSheet.absoluteFill}
+          contentFit="cover"
+          onLoad={() => setImageLoaded(true)}
+        />
+      </Animated.View>
 
-        return {
-            width: dimensions.width - sidePadding * 2,
-            height: dimensions.width * 1.5,
-            marginVertical: SPACING.md,
-        };
-    };
+      <Pressable style={StyleSheet.absoluteFill} onPress={handleCourtPress} />
 
-    return (
-        <View
-            style={[
-                styles.courtContainer,
-                isDesktop ? styles.desktopCourtContainer : styles.mobileCourtContainer,
-                !isDesktop && Platform.OS !== "web" && getMobileStyles(),
-            ]}
-            onLayout={handleLayout}
+      {edit && showZones && (
+        <DebugZoneOverlay width={size.width} height={size.height} />
+      )}
+
+      {currentShot && (
+        <ShotPopup
+          shot={currentShot}
+          handleShots={handleShot}
+          isMultiple={isMultipleShotMode}
+          courtHeight={size.height}
+          courtWidth={size.width}
+        />
+      )}
+
+      {shots.map((shot, index) => (
+        <ShotMarker
+          key={index}
+          shot={shot}
+          courtHeight={size.height}
+          courtWidth={size.width}
+          edit={edit}
+        />
+      ))}
+      {edit && (
+        <AnimatedSwitch
+          onText="Single"
+          offText="Multiple"
+          isSwitched={isMultipleShotMode}
+          onPress={() => setIsMultipleShotMode((prev) => !prev)}
+        />
+      )}
+      {edit && (
+        <Pressable
+          onPress={() => setShowZones((prev) => !prev)}
+          style={{
+            position: "absolute",
+            bottom: 10,
+            left: 10,
+            zIndex: 10,
+            padding: 8,
+            backgroundColor: "white",
+            borderRadius: 4,
+          }}
         >
-            <Animated.View
-                style={{
-                    opacity: fadeAnim,
-                    ...StyleSheet.flatten(styles.courtImage),
-                }}
-            >
-                {!imageLoaded && (
-                    <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color={COLORS.primaryAccent} />
-                    </View>
-                )}
-                <Image
-                    source={require("@/assets/images/court.jpg")}
-                    style={StyleSheet.absoluteFill}
-                    contentFit="cover"
-                    onLoad={() => setImageLoaded(true)}
-                />
-            </Animated.View>
-
-            <Pressable style={StyleSheet.absoluteFill} onPress={handleCourtPress} />
-
-            {currentShot && (
-                <ShotPopup
-                    shot={currentShot}
-                    handleShots={handleShot}
-                    isMultiple={isMultipleShotMode}
-                    courtHeight={size.height}
-                    courtWidth={size.width}
-                />
-            )}
-
-            {shots.map((shot, index) => (
-                <ShotMarker
-                    key={index}
-                    shot={shot}
-                    courtHeight={size.height}
-                    courtWidth={size.width}
-                    edit={edit}
-                />
-            ))}
-            {edit && (
-                <AnimatedSwitch
-                    onText="Single"
-                    offText="Multiple"
-                    isSwitched={isMultipleShotMode}
-                    onPress={() => setIsMultipleShotMode((prev) => !prev)}
-                />
-            )}
-        </View>
-    );
+          <Text>Toggle Zones</Text>
+        </Pressable>
+      )}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    courtContainer: {
-        borderRadius: BORDER_RADIUS.lg,
-        overflow: "hidden",
-        position: "relative",
-        borderColor: COLORS.borderColor,
-        borderWidth: 1,
-        backgroundColor: COLORS.cardBackground,
-        ...createShadow(4),
-    },
-    mobileCourtContainer: {
-        flex: Platform.OS === "web" ? 1 : 0,
-        alignSelf: "center",
-    },
-    desktopCourtContainer: {
-        width: "90%",
-        maxWidth: 900,
-        height: 700,
-        aspectRatio: 0.85,
-        alignSelf: "center",
-    },
-    courtImage: {
-        width: "100%",
-        height: "100%",
-        borderRadius: BORDER_RADIUS.lg,
-    },
-    loadingContainer: {
-        ...StyleSheet.absoluteFillObject,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: COLORS.cardBackground,
-    },
-    toggleContainer: {
-        position: "absolute",
-        bottom: SPACING.md,
-        right: SPACING.md,
-    },
-    toggleBackground: {
-        width: 80, // fixed width
-        height: 28,
-        borderRadius: 14,
-        justifyContent: "center",
-        paddingHorizontal: 2,
-        overflow: "hidden",
-    },
-    toggleCircle: {
-        position: "absolute",
-        width: 36,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: COLORS.cardBackground,
-        borderWidth: 1,
-        borderColor: COLORS.borderColor,
-        top: 2,
-        left: 2,
-    },
-    singleShotText: {
-        color: COLORS.textSecondary,
-    },
-    multipleShotText: {
-        color: COLORS.textSecondary,
-    },
-    toggleText: {
-        position: "absolute",
-        fontWeight: "600",
-        fontSize: 12,
-        top: "50%",
-        transform: [{ translateY: -8 }],
-    },
+  courtContainer: {
+    borderRadius: BORDER_RADIUS.lg,
+    overflow: "hidden",
+    position: "relative",
+    borderColor: COLORS.borderColor,
+    borderWidth: 1,
+    backgroundColor: COLORS.cardBackground,
+    ...createShadow(4),
+  },
+  mobileCourtContainer: {
+    flex: Platform.OS === "web" ? 1 : 0,
+    alignSelf: "center",
+  },
+  desktopCourtContainer: {
+    width: "90%",
+    maxWidth: 900,
+    height: 700,
+    aspectRatio: 0.85,
+    alignSelf: "center",
+  },
+  courtImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: BORDER_RADIUS.lg,
+  },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: COLORS.cardBackground,
+  },
+  toggleContainer: {
+    position: "absolute",
+    bottom: SPACING.md,
+    right: SPACING.md,
+  },
+  toggleBackground: {
+    width: 80, // fixed width
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    paddingHorizontal: 2,
+    overflow: "hidden",
+  },
+  toggleCircle: {
+    position: "absolute",
+    width: 36,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: COLORS.cardBackground,
+    borderWidth: 1,
+    borderColor: COLORS.borderColor,
+    top: 2,
+    left: 2,
+  },
+  singleShotText: {
+    color: COLORS.textSecondary,
+  },
+  multipleShotText: {
+    color: COLORS.textSecondary,
+  },
+  toggleText: {
+    position: "absolute",
+    fontWeight: "600",
+    fontSize: 12,
+    top: "50%",
+    transform: [{ translateY: -8 }],
+  },
 });
 
 export default BasketballCourt;

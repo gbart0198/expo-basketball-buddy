@@ -1,5 +1,12 @@
 import PaddedSafeAreaView from "@/components/PaddedSafeAreaView";
-import { Text, StyleSheet, FlatList, View, Pressable } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  FlatList,
+  View,
+  Pressable,
+  ScrollView,
+} from "react-native";
 import { FONT_SIZE, COLORS, SPACING, BORDER_RADIUS } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { GoalCard } from "@/components/GoalCard";
@@ -97,11 +104,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     marginTop: SPACING.md,
     marginBottom: SPACING.md,
+    height: "50%",
   },
   completedGoals: {
     paddingHorizontal: SPACING.md,
     marginTop: SPACING.md,
     marginBottom: SPACING.md,
+    height: "50%",
   },
   list: {
     width: "100%",
